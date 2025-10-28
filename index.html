@@ -11,119 +11,147 @@
   <style>
     /* -----------------------------
        CONFIGURAÇÕES GLOBAIS
-       Fundo totalmente preto; existe um slot para imagem de background, talvez eu troque depois
        ----------------------------- */
     :root{
-      --accent: #eaeaea; /* texto frio */
-      --accent-2: #7b0000; /* vermelho seco para divisores */
+      --accent: #eaeaea;
+      --accent-2: #7b0000;
       --muted: #bbbbbb;
-      --bg-image: url('background-template.jpg'); /* troque esse arquivo para adicionar imagem de fundo */
+      --bg-image: url('background-template.jpg');
       --portrait-normal: url('portrait_normal.png');
       --portrait-injured: url('portrait_injured.png');
       --portrait-insane: url('portrait_insane.png');
     }
 
-    html,body{height:100%;}
+    /* reset / box sizing */
+    *{box-sizing:border-box;}
+    html,body{height:100%;margin:0;padding:0;overflow:hidden;} /* remove scrollbars da página */
     body{
-      margin:0;
       font-family: 'Spectral', serif;
-      background: #080808;
-      /* A imagem de fundo é opcional — se não existir, fica totalmente preta */
-      background-blend-mode: multiply; /* use com cuidado — sem sombras internas */
+      background:#080808;
       color:var(--accent);
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
+      font-size:14px; /* escala geral reduzida */
     }
 
-    /* Layout em três colunas fixas */
+    /* Layout em três colunas fixas (ajustadas para caber) */
     .wrap{
       display:grid;
-      grid-template-columns: 300px 1fr 320px;
-      gap:24px;
-      padding:28px;
+      grid-template-columns: 240px 1fr 300px; /* colunas estreitas para evitar overflow */
+      gap:18px;
+      padding:16px;
       height:100vh;
-      box-sizing:border-box;
+      align-items:start;
+      min-width:0; /* evita overflow horizontal de children */
     }
 
     /* Painel esquerdo - Vital */
     .panel{
       background: rgba(0,0,0,0.6);
       border:1px solid rgba(255,255,255,0.03);
-      padding:18px;
+      padding:12px;
       box-sizing:border-box;
+      height:calc(100vh - 32px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
     }
 
     .portrait{
       width:100%;
-      height:420px;
+      height:480px; /* reduzido para encaixar */
       background-image:var(--portrait-normal);
       background-size:cover;
       background-position:center;
       border:1px solid rgba(255,255,255,0.04);
-      margin-bottom:12px;
+      margin-bottom:10px;
+      flex-shrink:0;
     }
 
     .vitals{
       display:flex;
-      gap:12px;
+      gap:8px;
       justify-content:space-between;
       align-items:center;
+      margin-top:auto;
     }
 
     .vital{
       flex:1;
       text-align:center;
-      padding:10px 8px;
+      padding:8px 6px;
       border:1px dashed rgba(255,255,255,0.03);
+      min-width:0;
     }
 
-    .vital h4{font-family:'Cinzel Decorative', serif;margin:0 0 6px 0;font-size:18px;color:var(--accent);}
-    .vital .number{font-family:'VT323', monospace;font-size:34px;color:var(--accent);}
+    .vital h4{font-family:'Cinzel Decorative', serif;margin:0 0 6px 0;font-size:15px;color:var(--accent);}
+    .vital .number{font-family:'VT323', monospace;font-size:28px;color:var(--accent);}
 
-    .small-btn{display:inline-block;padding:6px 8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer;margin-top:8px;font-size:13px}
+    .small-btn{display:inline-block;padding:5px 7px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer;margin-top:6px;font-size:12px}
 
-    /* Area central - A Ficha de fato */
+    /* Area central - a ficha (sem scroll interno) */
     .center{
       background: rgba(0,0,0,0.6);
-      padding:18px;
+      padding:12px;
       box-sizing:border-box;
-      overflow:auto;
+      height:calc(100vh - 32px);
+      overflow:hidden; /* sem barra lateral aqui conforme pedido */
+      min-width:0; /* evita que conteúdo force overflow horizontal */
     }
 
-    .heading{display:flex;justify-content:space-between;align-items:center}
-    .title{font-family:'Cinzel Decorative', serif;font-size:28px;}
-    .meta input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.06);color:var(--accent);padding:6px 8px;width:220px}
+    .heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .title{font-family:'Cinzel Decorative', serif;font-size:20px;margin-bottom:4px}
+    .meta input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.06);color:var(--accent);padding:6px 8px;width:200px;font-size:13px}
 
-    /* Grid de atributos */
-    .attrs{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .attr{padding:12px;border:1px solid rgba(255,255,255,0.04);}
-    .attr h5{margin:0 0 8px 0;font-size:13px;color:var(--muted)}
-    .attr .controls{display:flex;align-items:center;gap:8px}
-    .attr .val{font-family:'VT323', monospace;font-size:22px;width:46px;text-align:center}
-    .attr button{padding:6px 8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer}
+    /* Grid de atributos (ajustado) */
+    .attrs{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .attr{padding:10px;border:1px solid rgba(255,255,255,0.04);min-width:0}
+    .attr h5{margin:0 0 6px 0;font-size:12px;color:var(--muted)}
+    .attr .controls{display:flex;align-items:center;gap:6px}
+    .attr .val{font-family:'VT323', monospace;font-size:18px;width:42px;text-align:center}
+    .attr button{padding:5px 7px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer;font-size:12px}
 
-    /* Pericias/Habilidades e campos textuais */
-    .block{margin-top:16px}
-    textarea{width:100%;min-height:90px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);padding:8px;resize:vertical}
-    input[type=text]{width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent)}
+    /* Perícias/Habilidades e campos textuais */
+    .block{margin-top:12px}
+    textarea{width:100%;min-height:68px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);padding:8px;resize:vertical;font-size:13px}
+    input[type=text]{width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);font-size:13px}
 
     /* Painel direito - Inventário */
-    .inventory{background: rgba(0,0,0,0.6);padding:18px;box-sizing:border-box;height:100%;overflow:auto}
-    .inv-list{list-style:none;padding:0;margin:0}
-    .inv-item{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.03)}
-    .inv-add{margin-top:12px;display:flex;gap:8px}
-    .inv-add input{flex:1}
+    .inventory{
+      background: rgba(0,0,0,0.6);
+      padding:12px;
+      box-sizing:border-box;
+      height:calc(100vh - 32px);
+      overflow:hidden; /* sem scroll lateral direito */
+      display:flex;
+      flex-direction:column;
+    }
+    .inv-list{list-style:none;padding:0;margin:0;flex:0 1 auto;overflow:auto;}
+    .inv-item{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px}
+    .inv-add{margin-top:10px;display:flex;gap:8px}
+    .inv-add input{flex:1;padding:7px;font-size:13px}
 
     /* Mensagens estranhas (aparecem somente quando PS baixo) */
-    .strange-msg{margin-top:12px;padding:10px;border-left:3px solid var(--accent-2);color:var(--muted);display:none}
+    .strange-msg{margin-top:12px;padding:10px;border-left:3px solid var(--accent-2);color:var(--muted);display:none;font-size:13px}
 
-    /* Responsividade */
+    /* pequenos ajustes para evitar overflow horizontal em elementos internos */
+    input, textarea, .attr, .panel, .inventory, .center {max-width:100%;}
+
+    /* Responsividade reduzida (mantém tudo enquadrado) */
+    @media(max-width:1200px){
+      .wrap{grid-template-columns:220px 1fr 260px;gap:12px;padding:10px}
+      .portrait{height:420px}
+      .title{font-size:18px}
+    }
     @media(max-width:980px){
+      html,body{overflow:auto;} /* em telas bem pequenas permitimos scroll da página */
       .wrap{grid-template-columns:1fr;grid-auto-rows:min-content;padding:12px;}
       .portrait{height:320px}
+      .center{overflow:visible}
+      .inventory{overflow:visible;height:auto}
     }
 
-    /* pequenas instruções em rodapé do painel */
     .hint{font-size:12px;color:var(--muted);margin-top:8px}
   </style>
 </head>
@@ -171,7 +199,7 @@
       <div class="heading">
         <div>
           <div class="title">Ficha — Horror RPG</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:6px">Preencha campos e ajuste atributos (0–3). PV e PT são calculados automaticamente.</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:6px">Preencha campos e ajuste atributos (0–3). PV e PT são calculados automaticamente.</div>
         </div>
 
         <div class="meta">
@@ -179,7 +207,7 @@
         </div>
       </div>
 
-      <div class="block" style="margin-top:14px">
+      <div class="block" style="margin-top:12px">
         <label style="display:block;margin-bottom:6px;color:var(--muted)">Informações</label>
         <input id="hometown" type="text" placeholder="Cidade natal" />
         <div style="height:8px"></div>
@@ -226,7 +254,8 @@
             <div class="controls">
               <button data-attr="INT" class="attr-dec">-</button>
               <div class="val" id="INT">0</div>
-              <button data-attr="INT" class="attr-inc">+</button>\            </div>
+              <button data-attr="INT" class="attr-inc">+</button>
+            </div>
           </div>
 
           <!-- AUR -->
@@ -266,7 +295,7 @@
 
     <!-- DIREITA: Inventário -->
     <aside class="inventory">
-      <h4 style="margin:0 0 8px 0;font-family:'Cinzel Decorative', serif">Inventário</h4>
+      <h4 style="margin:0 0 8px 0;font-family:'Cinzel Decorative', serif;font-size:16px">Inventário</h4>
       <ul class="inv-list" id="invList">
         <!-- itens vão aqui -->
       </ul>
@@ -285,13 +314,6 @@
   <script>
     /* -----------------------------
        LOGICA INTERATIVA
-       - atributos 0..3
-       - calculos: HP = 10 + VIG*3
-                 PT = clamp(6 + AUR*2, 6, 12)
-       - PS base 50
-       - PT aumenta (ptPlus button) até limite; ptMinus reduz por erro admin
-       - portrait troca com base nos thresholds
-       - mensagens estranhas aparecem quando PS < 25
        ----------------------------- */
 
     // valores iniciais
@@ -334,14 +356,13 @@
       // HP
       const vig = state.attrs.VIG;
       state.hpMax = 10 + (vig * 3);
-      // Se pv > novo max, ajustar
       state.pv = clamp(state.pv, 0, state.hpMax);
 
       // PT
       const aur = state.attrs.AUR;
       state.pt = clamp(6 + (aur * 2), 6, 12);
 
-      // PS permanece livre (pode variar), mas tem base 50
+      // PS
       state.ps = clamp(state.ps, 0, 999);
 
       renderAll();
@@ -361,10 +382,7 @@
       psDisplay.textContent = state.ps;
       ptDisplay.textContent = state.pt;
 
-      // portrait logic:
-      // - if PS < 25 => insane portrait
-      // - else if PV < 50% of max => injured portrait
-      // - else normal
+      // portrait logic
       if(state.ps < 25){
         portrait.style.backgroundImage = "var(--portrait-insane)";
       } else if(state.pv < (state.hpMax/2)){
@@ -381,7 +399,6 @@
         strangeMsg.style.display = 'none';
       }
 
-      // inventory
       renderInventory();
     }
 
@@ -404,7 +421,6 @@
         const curr = state.attrs[a];
         if(curr < 3){
           state.attrs[a] = curr + 1;
-          // quando VIG muda, recalcular HP; quando AUR muda, recalcular PT
           recalcAll();
         }
       });
@@ -427,7 +443,7 @@
     document.getElementById('psPlus').addEventListener('click', ()=>{ state.ps = state.ps+1; renderAll(); });
     document.getElementById('psMinus').addEventListener('click', ()=>{ state.ps = Math.max(0, state.ps-1); renderAll(); });
 
-    // PT aumenta com ptPlus, até limite; ptMinus permite reduzir manualmente (use com cuidado)
+    // PT adjustments
     document.getElementById('ptPlus').addEventListener('click', ()=>{ state.pt = clamp(state.pt+1, 6, 12); renderAll(); });
     document.getElementById('ptMinus').addEventListener('click', ()=>{ state.pt = clamp(state.pt-1, 6, 12); renderAll(); });
 
@@ -450,8 +466,6 @@
 
     // initialize
     recalcAll();
-
-
   </script>
 </body>
 </html>
