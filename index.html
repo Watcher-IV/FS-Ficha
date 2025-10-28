@@ -3,140 +3,107 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ficha Flagelo-Sombrio (Protótipo)</title>
+  <title>Ficha Flagelo-Sombrio (Otimizada + LocalStorage)</title>
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Spectral:wght@300;400;600&family=VT323&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --accent: #eaeaea;
-      --muted: #bbbbbb;
-      --bg: #080808;
-      --pv-color: #8b0000; /* vermelho profundo */
-      --ps-color: #4b6576; /* azul acinzentado */
-      --tension-color: #8a0715; /* escarlate */
-      --panel-bg: rgba(0,0,0,0.6);
-      --edge: rgba(255,255,255,0.03);
+      --accent:#eaeaea;--muted:#bbbbbb;--bg:#080808;
+      --pv-color:#8b0000;--ps-color:#4b6576;--tension-color:#8a0715;
+      --panel-bg:rgba(0,0,0,0.6);--edge:rgba(255,255,255,0.03);
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;padding:0;overflow:hidden;background:var(--bg);color:var(--accent);font-family:'Spectral',serif}
-    body{font-size:14px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    html,body{height:100%;margin:0;padding:0;background:var(--bg);color:var(--accent);font-family:'Spectral',serif}
+    body{font-size:14px;-webkit-font-smoothing:antialiased}
 
-    .wrap{
-      display:grid;
-      grid-template-columns: 240px 1fr 320px;
-      gap:18px;
-      padding:16px;
-      height:100vh;
-      min-width:0;
-    }
+    .wrap{display:grid;grid-template-columns:240px 1fr 320px;gap:18px;padding:16px;height:100vh;min-width:0}
+    .panel,.center,.inventory{background:var(--panel-bg);border:1px solid var(--edge);padding:12px;height:calc(100vh - 32px);overflow:auto}
+    .panel{display:flex;flex-direction:column;gap:12px}
 
-    /* LEFT PANEL */
-    .panel{
-      background:var(--panel-bg);
-      border:1px solid var(--edge);
-      padding:12px;
-      height:calc(100vh - 32px);
-      display:flex;flex-direction:column;gap:12px;overflow:hidden;
-    }
+    .portrait{width:100%;height:360px;background-size:cover;background-position:center;border:1px solid rgba(255,255,255,0.04)}
 
-    .portrait{
-      width:100%;height:360px;background-image:var(--portrait-normal);background-size:cover;background-position:center;border:1px solid rgba(255,255,255,0.04)
-    }
-
-    /* Vitals stacked */
     .vitals{display:flex;flex-direction:column;gap:10px}
-    .vital{padding:6px;border:1px dashed var(--edge);min-width:0}
+    .vital{padding:6px;border:1px dashed var(--edge);position:relative}
     .vital h4{font-family:'Cinzel Decorative',serif;margin:0 0 6px 0;font-size:14px;color:var(--accent)}
-    /* hide number spinner */
-    input[type=number]{-moz-appearance:textfield;-webkit-appearance:none;margin:0;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--accent);font-family:VT323,monospace;font-size:16px;width:100%;text-align:center}
-    input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 
-    /* Bars */
+    input[type=number]{-moz-appearance:textfield;-webkit-appearance:none;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--accent);font-family:VT323,monospace;font-size:16px;width:100%;text-align:center}
+    input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+
     .bar-wrap{background:rgba(255,255,255,0.03);height:12px;border-radius:4px;margin-top:8px;overflow:hidden}
-    .bar-fill{height:100%;width:0%;background:var(--pv-color);transition:width .2s ease}
-
+    .bar-fill{height:100%;width:0%;transition:width .5s cubic-bezier(.2,.9,.2,1)}
     .bar-ps .bar-fill{background:var(--ps-color)}
     .bar-tension .bar-fill{background:var(--tension-color)}
+    .bar-pv .bar-fill{background:var(--pv-color)}
 
-    /* Effects free text */
+    .bar-label{position:absolute;right:10px;top:6px;font-family:VT323,monospace;font-size:13px;color:var(--muted)}
+
     .effects{flex:1;display:flex;flex-direction:column;gap:8px}
     .effects textarea{flex:1;min-height:120px;padding:8px;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.03);color:var(--accent);resize:vertical}
 
-    /* CENTER */
-    .center{background:var(--panel-bg);padding:12px;height:calc(100vh - 32px);overflow:auto;min-width:0;-ms-overflow-style:none;scrollbar-width:none}
-    .center::-webkit-scrollbar{display:none}
-    .title-wrap{display:flex;justify-content:center;margin-bottom:10px}
-    .title{font-family:'Cinzel Decorative',serif;font-size:22px}
+    .center{overflow:auto;min-width:0}
+    .title{font-family:'Cinzel Decorative',serif;font-size:22px;text-align:center;margin-bottom:10px}
 
-    .personal{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+    .personal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
     .personal input{width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);font-size:13px}
 
-    /* Attributes grid */
     .attrs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
     .attr{padding:10px;border:1px solid rgba(255,255,255,0.04)}
     .attr h5{margin:0 0 6px 0;font-size:12px;color:var(--muted)}
-    .attr .controls{display:flex;align-items:center;gap:6px}
-    .attr .val{font-family:'VT323',monospace;font-size:18px;width:46px;text-align:center;background:transparent;border:none;color:var(--accent)}
+    .controls{display:flex;align-items:center;gap:6px}
+    .val{font-family:'VT323',monospace;font-size:18px;width:46px;text-align:center;background:transparent;border:none;color:var(--accent)}
     .attr button{padding:5px 7px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer;font-size:12px}
 
-    /* Remove explanatory lines under VIG/AUR (they were removed) */
-
-    /* Skills / Abilities */
     .skill-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
     .skill-box{background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.03);padding:8px}
-    .skill-box label{display:block;margin-bottom:6px;color:var(--muted)}
     .skill-box textarea{width:100%;min-height:120px;padding:8px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.03);color:var(--accent);resize:vertical}
 
-    /* Conditions */
-    .conditions{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+    .conditions{margin-top:12px}
     .conditions .subtitle{font-size:16px;text-align:center;font-family:'Cinzel Decorative',serif}
     .conditions textarea{min-height:260px;padding:10px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.03);color:var(--accent);resize:vertical}
 
-    /* RIGHT: inventory */
-    .inventory{background:var(--panel-bg);padding:12px;height:calc(100vh - 32px);display:flex;flex-direction:column;gap:8px}
     .inv-add{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px}
     .inv-add input{padding:6px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--accent)}
     .inv-add button{padding:6px 8px}
-    .inv-list{list-style:none;padding:0;margin:0;overflow:auto;flex:1 1 auto}
-    .inv-list::-webkit-scrollbar{display:none}
+    .inv-list{list-style:none;padding:0;margin:0;overflow:auto}
     .inv-item{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px}
-    .inv-item .left{flex:1}
     .inv-item .meta{min-width:68px;text-align:right;color:var(--muted);font-size:13px}
 
-    @media(max-width:1200px){.wrap{grid-template-columns:220px 1fr 280px}.portrait{height:320px}.title{font-size:20px}}
-    @media(max-width:980px){html,body{overflow:auto}.wrap{grid-template-columns:1fr;grid-auto-rows:min-content;padding:12px}.portrait{height:240px}.center{height:auto;overflow:visible}.inventory{height:auto;overflow:visible}}
+    .top-actions{display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px}
+    .top-actions button{padding:6px 10px}
 
+    @media(max-width:1200px){.wrap{grid-template-columns:220px 1fr 280px}.portrait{height:320px}.title{font-size:20px}}
+    @media(max-width:980px){html,body{overflow:auto}.wrap{grid-template-columns:1fr;grid-auto-rows:min-content;padding:12px}.portrait{height:240px}.center{height:auto}.inventory{height:auto}}
   </style>
 </head>
 <body>
 
   <div class="wrap">
 
-    <!-- LEFT -->
+    <!-- ESQUERDA -->
     <aside class="panel">
-      <div class="portrait" id="portrait"></div>
+      <div class="portrait" id="portrait" style="--portrait-normal:url('');--portrait-injured:url('');--portrait-insane:url('')"></div>
 
       <div class="vitals">
-        <!-- PV -->
         <div class="vital">
           <h4>PV</h4>
+          <div class="bar-label"><span id="pvLabel">10/10</span></div>
           <input type="number" id="pvInput" value="10" min="0" />
-          <div class="bar-wrap" aria-hidden="true"><div id="pvBar" class="bar-fill" style="background:var(--pv-color)"></div></div>
+          <div class="bar-wrap bar-pv" aria-hidden="true"><div id="pvBar" class="bar-fill"></div></div>
         </div>
 
-        <!-- PS -->
         <div class="vital">
           <h4>PS</h4>
+          <div class="bar-label"><span id="psLabel">50/100</span></div>
           <input type="number" id="psInput" value="50" min="0" />
           <div class="bar-wrap bar-ps" aria-hidden="true"><div id="psBar" class="bar-fill"></div></div>
         </div>
 
-        <!-- Tensão -->
         <div class="vital">
           <h4>Tensão</h4>
+          <div class="bar-label"><span id="tensionLabel">6/12</span></div>
           <input type="number" id="tensionInput" value="6" min="0" />
           <div class="bar-wrap bar-tension" aria-hidden="true"><div id="tensionBar" class="bar-fill"></div></div>
         </div>
@@ -148,9 +115,10 @@
       </div>
     </aside>
 
-    <!-- CENTER -->
+    <!-- CENTRO -->
     <main class="center" id="centerPane">
-      <div class="title-wrap"><div class="title">Ficha — Flagelo Sombrio</div></div>
+      <div class="top-actions"><button id="saveBtn">Salvar ficha</button><button id="clearBtn">Limpar ficheiro</button></div>
+      <div class="title">Ficha — Flagelo Sombrio</div>
 
       <div class="personal">
         <input id="nameField" placeholder="Nome" />
@@ -161,89 +129,27 @@
         <div></div>
       </div>
 
-      <div class="block">
-        <label style="display:block;margin-bottom:8px;color:var(--muted)">Atributos (0 a 10)</label>
-        <div class="attrs">
-          <!-- FOR -->
-          <div class="attr">
-            <h5>FOR — Poder Físico</h5>
-            <div class="controls">
-              <button type="button" data-attr="FOR" class="attr-dec">-</button>
-              <input class="val" id="FOR" readonly value="0" />
-              <button type="button" data-attr="FOR" class="attr-inc">+</button>
-            </div>
-          </div>
+      <label style="display:block;margin-bottom:8px;color:var(--muted)">Atributos (0 a 10)</label>
+      <div class="attrs" id="attrs">
+        <!-- cada .attr usa data-attr para simplificar eventos -->
+        <div class="attr" data-attr="FOR"><h5>FOR — Poder Físico</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+        <div class="attr" data-attr="AGI"><h5>AGI — Velocidade e Precisão</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+        <div class="attr" data-attr="VIG"><h5>VIG — Resistência Física</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
 
-          <!-- AGI -->
-          <div class="attr">
-            <h5>AGI — Velocidade e Precisão</h5>
-            <div class="controls">
-              <button type="button" data-attr="AGI" class="attr-dec">-</button>
-              <input class="val" id="AGI" readonly value="0" />
-              <button type="button" data-attr="AGI" class="attr-inc">+</button>
-            </div>
-          </div>
-
-          <!-- VIG -->
-          <div class="attr">
-            <h5>VIG — Resistência Física</h5>
-            <div class="controls">
-              <button type="button" data-attr="VIG" class="attr-dec">-</button>
-              <input class="val" id="VIG" readonly value="0" />
-              <button type="button" data-attr="VIG" class="attr-inc">+</button>
-            </div>
-          </div>
-
-          <!-- INT -->
-          <div class="attr">
-            <h5>INT — Conhecimento e Lógica</h5>
-            <div class="controls">
-              <button type="button" data-attr="INT" class="attr-dec">-</button>
-              <input class="val" id="INT" readonly value="0" />
-              <button type="button" data-attr="INT" class="attr-inc">+</button>
-            </div>
-          </div>
-
-          <!-- AUR -->
-          <div class="attr">
-            <h5>AUR — Energia Espiritual</h5>
-            <div class="controls">
-              <button type="button" data-attr="AUR" class="attr-dec">-</button>
-              <input class="val" id="AUR" readonly value="0" />
-              <button type="button" data-attr="AUR" class="attr-inc">+</button>
-            </div>
-          </div>
-
-          <!-- CAR -->
-          <div class="attr">
-            <h5>CAR — Influência Social</h5>
-            <div class="controls">
-              <button type="button" data-attr="CAR" class="attr-dec">-</button>
-              <input class="val" id="CAR" readonly value="0" />
-              <button type="button" data-attr="CAR" class="attr-inc">+</button>
-            </div>
-          </div>
-        </div>
+        <div class="attr" data-attr="INT"><h5>INT — Conhecimento e Lógica</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+        <div class="attr" data-attr="AUR"><h5>AUR — Energia Espiritual</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+        <div class="attr" data-attr="CAR"><h5>CAR — Influência Social</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
       </div>
 
       <div class="skill-row">
-        <div class="skill-box">
-          <label>Perícias</label>
-          <textarea id="skills" placeholder="Liste perícias (uma por linha)"></textarea>
-        </div>
-        <div class="skill-box">
-          <label>Habilidades</label>
-          <textarea id="abilities" placeholder="Liste habilidades (uma por linha)"></textarea>
-        </div>
+        <div class="skill-box"><label>Perícias</label><textarea id="skills" placeholder="Liste perícias (uma por linha)"></textarea></div>
+        <div class="skill-box"><label>Habilidades</label><textarea id="abilities" placeholder="Liste habilidades (uma por linha)"></textarea></div>
       </div>
 
-      <div class="conditions">
-        <div class="subtitle">Condições e Características</div>
-        <textarea id="notes" placeholder="Condições, características e notas importantes"></textarea>
-      </div>
+      <div class="conditions"><div class="subtitle">Condições e Características</div><textarea id="notes" placeholder="Condições, características e notas importantes"></textarea></div>
     </main>
 
-    <!-- RIGHT: inventory (add at top) -->
+    <!-- DIREITA: inventory -->
     <aside class="inventory">
       <h4 style="margin:0 0 8px 0;font-family:'Cinzel Decorative',serif;font-size:16px">Inventário</h4>
 
@@ -251,7 +157,7 @@
         <input id="invName" placeholder="Nome do item" />
         <input id="invQty" type="number" placeholder="Qtd" min="1" />
         <input id="invSpace" placeholder="Espaço/Tipo" />
-        <button type="button" class="small-btn" id="invAddBtn">+ adicionar</button>
+        <button type="button" id="invAddBtn">+ adicionar</button>
       </div>
 
       <ul class="inv-list" id="invList"></ul>
@@ -260,141 +166,201 @@
   </div>
 
 <script>
-  /* State */
+  // estado centralizado
+  const STORAGE_KEY = 'fichaFlagelo_v1';
   const state = {
-    attrs: {FOR:0,AGI:0,VIG:0,INT:0,AUR:0,CAR:0},
-    hpMax:10,
-    pv:10,
-    ps:50,
-    tension:6,
-    inventory:[],
-    manualTensionOverride:false
+    attrs:{FOR:0,AGI:0,VIG:0,INT:0,AUR:0,CAR:0},
+    hpMax:10,pv:10,ps:50,tension:6,inventory:[],manualTensionOverride:false,
+    personal:{name:'',origin:'',age:'',height:'',eye:''},
+    skills:'',abilities:'',notes:'',effects:''
   };
 
-  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+  const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
+  const q = sel => document.querySelector(sel);
+  const qAll = sel => Array.from(document.querySelectorAll(sel));
 
-  // DOM refs
-  const pvInput = document.getElementById('pvInput');
-  const psInput = document.getElementById('psInput');
-  const tensionInput = document.getElementById('tensionInput');
+  // refs
+  const pvInput = q('#pvInput'), psInput = q('#psInput'), tensionInput = q('#tensionInput');
+  const pvBar = q('#pvBar'), psBar = q('#psBar'), tensionBar = q('#tensionBar');
+  const pvLabel = q('#pvLabel'), psLabel = q('#psLabel'), tensionLabel = q('#tensionLabel');
+  const portrait = q('#portrait');
+  const invList = q('#invList');
+  const attrsWrap = q('#attrs');
 
-  const pvBar = document.getElementById('pvBar');
-  const psBar = document.getElementById('psBar');
-  const tensionBar = document.getElementById('tensionBar');
-
-  const portrait = document.getElementById('portrait');
-
-  const invList = document.getElementById('invList');
-
-  // attribute elements (read-only inputs)
-  const attrKeys = ['FOR','AGI','VIG','INT','AUR','CAR'];
-
-  function recalcAll(){
-    // HP max from VIG
-    const vig = state.attrs.VIG;
-    state.hpMax = 10 + (vig * 3);
-
-    if(!state.manualTensionOverride){
-      const aur = state.attrs.AUR;
-      state.tension = clamp(6 + (aur * 2),6,12);
-    }
-
-    state.pv = Math.max(0, Number(state.pv)||0);
-    state.ps = Math.max(0, Number(state.ps)||0);
-
-    renderAll();
+  // persistence: save/load
+  function saveToStorage(){
+    // copy minimal serializable state
+    const out = {
+      attrs: state.attrs,
+      pv: state.pv, ps: state.ps, tension: state.tension,
+      inventory: state.inventory,
+      personal: state.personal,
+      skills: q('#skills').value,
+      abilities: q('#abilities').value,
+      notes: q('#notes').value,
+      effects: q('#effectsField').value
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(out));
   }
 
-  function renderAll(){
-    // attributes display
-    attrKeys.forEach(k=>{
-      const el = document.getElementById(k);
-      if(el) el.value = state.attrs[k];
-    });
+  function loadFromStorage(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    try{
+      const o = JSON.parse(raw);
+      if(o.attrs) state.attrs = Object.assign(state.attrs, o.attrs);
+      if(typeof o.pv==='number' || typeof o.pv==='string') state.pv = Number(o.pv);
+      if(typeof o.ps==='number' || typeof o.ps==='string') state.ps = Number(o.ps);
+      if(typeof o.tension==='number' || typeof o.tension==='string') state.tension = Number(o.tension);
+      if(Array.isArray(o.inventory)) state.inventory = o.inventory.slice();
+      if(o.personal) state.personal = Object.assign(state.personal, o.personal);
+      if(typeof o.skills==='string') q('#skills').value = o.skills;
+      if(typeof o.abilities==='string') q('#abilities').value = o.abilities;
+      if(typeof o.notes==='string') q('#notes').value = o.notes;
+      if(typeof o.effects==='string') q('#effectsField').value = o.effects;
+      return true;
+    }catch(e){ console.warn('load failed',e); return false; }
+  }
+
+  // simple numeric animation helper
+  function animateNumber(el, from, to, duration=400){
+    const start = performance.now();
+    const diff = to - from;
+    function frame(now){
+      const t = Math.min(1, (now - start)/duration);
+      const v = Math.round(from + diff * (1 - Math.pow(1 - t,3))); // easeOutCubic
+      el.textContent = v;
+      if(t < 1) requestAnimationFrame(frame);
+      else el.textContent = to; // ensure final
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function recalc(){
+    state.hpMax = 10 + (state.attrs.VIG * 3);
+    if(!state.manualTensionOverride){ state.tension = clamp(6 + (state.attrs.AUR * 2), 6, 12); }
+    state.pv = Math.max(0, Number(state.pv) || 0);
+    state.ps = Math.max(0, Number(state.ps) || 0);
+    render();
+  }
+
+  function render(){
+    // atributos
+    for(const [k,v] of Object.entries(state.attrs)){
+      const el = attrsWrap.querySelector(`[data-attr="${k}"] .val`);
+      if(el) el.value = v;
+    }
 
     // vitals inputs
-    pvInput.value = state.pv;
-    psInput.value = state.ps;
-    tensionInput.value = state.tension;
+    pvInput.value = state.pv; psInput.value = state.ps; tensionInput.value = state.tension;
 
-    // bars: PV% relative hpMax, PS assumed 100, Tension 6..12
+    // barras (animated width)
     const pvPct = state.hpMax>0 ? clamp((state.pv/state.hpMax)*100,0,100) : 0;
     pvBar.style.width = pvPct + '%';
+    psBar.style.width = clamp((state.ps/100)*100,0,100) + '%';
+    tensionBar.style.width = clamp(((state.tension-6)/6)*100,0,100) + '%';
 
-    const psPct = clamp((state.ps/100)*100,0,100);
-    psBar.style.width = psPct + '%';
+    // numeric labels animate
+    // pv label shows current / max
+    const currentPv = Math.max(0, Math.min(state.pv, state.hpMax));
+    animateNumber({textContent:pvLabel}, Number(pvLabel.textContent.split('/')[0]||0), currentPv, 350);
+    pvLabel.textContent = `${currentPv}/${state.hpMax}`; // ensure text shows both
 
-    const tensionPct = clamp(((state.tension-6)/6)*100,0,100);
-    tensionBar.style.width = tensionPct + '%';
+    // ps label
+    animateNumber({textContent:psLabel}, Number((psLabel.textContent||'0').split('/')[0]||0), state.ps, 350);
+    psLabel.textContent = `${state.ps}/100`;
 
-    // portrait logic
-    if(state.ps < 25){
-      portrait.style.backgroundImage = "var(--portrait-insane)";
-    } else if(Number(state.pv) < (state.hpMax/2)){
-      portrait.style.backgroundImage = "var(--portrait-injured)";
-    } else {
-      portrait.style.backgroundImage = "var(--portrait-normal)";
-    }
+    // tension label
+    animateNumber({textContent:tensionLabel}, Number((tensionLabel.textContent||'6').split('/')[0]||6), state.tension, 350);
+    tensionLabel.textContent = `${state.tension}/12`;
+
+    // portrait state
+    if(state.ps < 25) portrait.style.backgroundImage = "var(--portrait-insane)";
+    else if(state.pv < (state.hpMax/2)) portrait.style.backgroundImage = "var(--portrait-injured)";
+    else portrait.style.backgroundImage = "var(--portrait-normal)";
 
     renderInventory();
   }
 
-  // inventory render
   function renderInventory(){
-    invList.innerHTML = '';
-    state.inventory.forEach((it,idx)=>{
-      const li = document.createElement('li');
-      li.className='inv-item';
-      li.innerHTML = `<div class="left"><strong>${escapeHtml(it.name)}</strong><div style="font-size:12px;color:var(--muted)">${escapeHtml(it.space)}</div></div>
-                      <div class="meta">x${it.qty}<br><button type="button" data-idx="${idx}" class="small-btn inv-del">remover</button></div>`;
-      invList.appendChild(li);
-    });
+    invList.innerHTML = state.inventory.map((it,idx)=>
+      `<li class="inv-item"><div class="left"><strong>${escapeHtml(it.name)}</strong><div style="font-size:12px;color:var(--muted)">${escapeHtml(it.space)}</div></div><div class="meta">x${it.qty}<br><button data-idx="${idx}" class="inv-del">remover</button></div></li>`
+    ).join('');
   }
 
-  function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+  function escapeHtml(s){ if(!s) return ''; return String(s).replace(/[&<>\"']/g,ch=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[ch]); }
 
-  // attribute buttons (max 10)
-  document.querySelectorAll('.attr-inc').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const a = btn.getAttribute('data-attr');
-      const curr = state.attrs[a];
-      if(curr < 10){ state.attrs[a] = curr+1; if(a==='AUR') state.manualTensionOverride=false; recalcAll();}
-    });
-  });
-  document.querySelectorAll('.attr-dec').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const a = btn.getAttribute('data-attr');
-      const curr = state.attrs[a];
-      if(curr > 0){ state.attrs[a] = curr-1; if(a==='AUR') state.manualTensionOverride=false; recalcAll();}
-    });
+  // eventos: atributos (delegation)
+  attrsWrap.addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-action]');
+    if(!btn) return;
+    const action = btn.getAttribute('data-action');
+    const attrEl = btn.closest('.attr');
+    const key = attrEl && attrEl.dataset.attr;
+    if(!key) return;
+    const curr = state.attrs[key];
+    if(action === 'inc' && curr < 10) { state.attrs[key] = curr + 1; if(key==='AUR') state.manualTensionOverride=false; }
+    if(action === 'dec' && curr > 0) { state.attrs[key] = curr - 1; if(key==='AUR') state.manualTensionOverride=false; }
+    recalc();
   });
 
-  // vitals inputs (typing)
-  pvInput.addEventListener('input', ()=>{ state.pv = pvInput.value===''?0:Number(pvInput.value); renderAll(); });
-  psInput.addEventListener('input', ()=>{ state.ps = psInput.value===''?0:Number(psInput.value); renderAll(); });
-  tensionInput.addEventListener('input', ()=>{ state.tension = tensionInput.value===''?0:Number(tensionInput.value); state.manualTensionOverride=true; renderAll(); });
+  // vitals inputs
+  pvInput.addEventListener('input', ()=>{ state.pv = pvInput.value===''?0:Number(pvInput.value); render(); });
+  psInput.addEventListener('input', ()=>{ state.ps = psInput.value===''?0:Number(psInput.value); render(); });
+  tensionInput.addEventListener('input', ()=>{ state.tension = tensionInput.value===''?0:Number(tensionInput.value); state.manualTensionOverride = true; render(); });
 
-  // inventory add/remove
-  document.getElementById('invAddBtn').addEventListener('click', ()=>{
-    const name = document.getElementById('invName').value.trim();
-    const qty = Number(document.getElementById('invQty').value) || 1;
-    const space = document.getElementById('invSpace').value.trim() || '';
+  // inventário
+  q('#invAddBtn').addEventListener('click', ()=>{
+    const name = q('#invName').value.trim();
+    const qty = Number(q('#invQty').value) || 1;
+    const space = q('#invSpace').value.trim() || '';
     if(!name) return;
     state.inventory.push({name,qty,space});
-    document.getElementById('invName').value='';document.getElementById('invQty').value='';document.getElementById('invSpace').value='';
-    renderAll();
+    q('#invName').value='';q('#invQty').value='';q('#invSpace').value='';
+    render();
   });
 
-  invList.addEventListener('click',(e)=>{
-    if(e.target.classList.contains('inv-del')){
-      const idx = Number(e.target.getAttribute('data-idx'));
-      state.inventory.splice(idx,1);
-      renderAll();
-    }
+  invList.addEventListener('click', e=>{
+    const btn = e.target.closest('.inv-del'); if(!btn) return;
+    const idx = Number(btn.dataset.idx); if(isFinite(idx)) { state.inventory.splice(idx,1); render(); }
   });
 
-  // initial
-  recalcAll();
+  // personal fields sync
+  q('#nameField').addEventListener('input', e=>{ state.personal.name = e.target.value; });
+  q('#originField').addEventListener('input', e=>{ state.personal.origin = e.target.value; });
+  q('#ageField').addEventListener('input', e=>{ state.personal.age = e.target.value; });
+  q('#heightField').addEventListener('input', e=>{ state.personal.height = e.target.value; });
+  q('#eyeField').addEventListener('input', e=>{ state.personal.eye = e.target.value; });
+
+  // save / clear buttons
+  q('#saveBtn').addEventListener('click', ()=>{ saveToStorage(); alert('Ficha salva no localStorage.'); });
+  q('#clearBtn').addEventListener('click', ()=>{ if(confirm('Remover dados salvos?')){ localStorage.removeItem(STORAGE_KEY); location.reload(); } });
+
+  // auto-save on unload
+  window.addEventListener('beforeunload', ()=>{ saveToStorage(); });
+
+  // init: try load
+  (function init(){
+    const loaded = loadFromStorage();
+    // populate UI from state
+    // personal
+    q('#nameField').value = state.personal.name || '';
+    q('#originField').value = state.personal.origin || '';
+    q('#ageField').value = state.personal.age || '';
+    q('#heightField').value = state.personal.height || '';
+    q('#eyeField').value = state.personal.eye || '';
+    // text areas
+    q('#skills').value = q('#skills').value || '';
+    q('#abilities').value = q('#abilities').value || '';
+    q('#notes').value = q('#notes').value || '';
+    q('#effectsField').value = q('#effectsField').value || '';
+    // ensure numeric casts
+    state.pv = Number(state.pv) || 0; state.ps = Number(state.ps) || 0; state.tension = Number(state.tension) || 6;
+    recalc();
+  })();
+
+  // inicializa
+  // recalc já chamado no init
 </script>
 </body>
 </html>
