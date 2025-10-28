@@ -24,7 +24,7 @@
 
     /* reset / box sizing */
     *{box-sizing:border-box;}
-    html,body{height:100%;margin:0;padding:0;overflow:hidden;} /* remove scrollbars da página */
+    html,body{height:100%;margin:0;padding:0;overflow:hidden;} /* remove scrollbars from the page */
     body{
       font-family: 'Spectral', serif;
       background:#080808;
@@ -96,7 +96,7 @@
       padding:12px;
       box-sizing:border-box;
       height:calc(100vh - 32px);
-      overflow:hidden; /* sem barra lateral aqui conforme pedido */
+      overflow:hidden; 
       min-width:0; /* evita que conteúdo force overflow horizontal */
     }
 
@@ -145,7 +145,7 @@
       .title{font-size:18px}
     }
     @media(max-width:980px){
-      html,body{overflow:auto;} /* em telas bem pequenas permitimos scroll da página */
+      html,body{overflow:auto;} /* em telas bem pequenas permite o scroll da página */
       .wrap{grid-template-columns:1fr;grid-auto-rows:min-content;padding:12px;}
       .portrait{height:320px}
       .center{overflow:visible}
@@ -317,6 +317,7 @@
        ----------------------------- */
 
     // valores iniciais
+
     const state = {
       attrs: {FOR:0, AGI:0, VIG:0, INT:0, AUR:0, CAR:0},
       hpMax:10,
@@ -344,7 +345,7 @@
     const portrait = document.getElementById('portrait');
     const strangeMsg = document.getElementById('strangeMsg');
 
-    // messages quando PS < 25
+    // mensagens quando PS < 25%
     const strangePool = [
       'Você ouviu o seu nome em silêncio.',
       'Algo escreve na margem do seu pensamento.',
@@ -402,7 +403,7 @@
       renderInventory();
     }
 
-    // inventory functions
+    // funções do inventario 
     const invList = document.getElementById('invList');
     function renderInventory(){
       invList.innerHTML = '';
@@ -414,7 +415,7 @@
       });
     }
 
-    // attribute buttons
+    // botões dos atributos
     document.querySelectorAll('.attr-inc').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const a = btn.getAttribute('data-attr');
