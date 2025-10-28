@@ -24,28 +24,28 @@
 
     /* reset / box sizing */
     *{box-sizing:border-box;}
-    html,body{height:100%;margin:0;padding:0;overflow:hidden;} /* remove scrollbars from the page */
+    html,body{height:100%;margin:0;padding:0;overflow:hidden;} /* page hides outer scroll as requested */
     body{
       font-family: 'Spectral', serif;
       background:#080808;
       color:var(--accent);
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
-      font-size:14px; /* escala geral reduzida */
+      font-size:14px; /* base scale */
     }
 
-    /* Layout em três colunas fixas (ajustadas para caber) */
+    /* Layout: três colunas */
     .wrap{
       display:grid;
-      grid-template-columns: 240px 1fr 300px; /* colunas estreitas para evitar overflow */
+      grid-template-columns: 240px 1fr 320px;
       gap:18px;
       padding:16px;
       height:100vh;
       align-items:start;
-      min-width:0; /* evita overflow horizontal de children */
+      min-width:0;
     }
 
-    /* Painel esquerdo - Vital */
+    /* Painel esquerdo */
     .panel{
       background: rgba(0,0,0,0.6);
       border:1px solid rgba(255,255,255,0.03);
@@ -55,12 +55,11 @@
       overflow:hidden;
       display:flex;
       flex-direction:column;
-      justify-content:flex-start;
     }
 
     .portrait{
       width:100%;
-      height:480px; /* reduzido para encaixar */
+      height:360px;
       background-image:var(--portrait-normal);
       background-size:cover;
       background-position:center;
@@ -72,9 +71,8 @@
     .vitals{
       display:flex;
       gap:8px;
-      justify-content:space-between;
-      align-items:center;
-      margin-top:auto;
+      align-items:flex-start;
+      margin-bottom:10px;
     }
 
     .vital{
@@ -85,71 +83,94 @@
       min-width:0;
     }
 
-    .vital h4{font-family:'Cinzel Decorative', serif;margin:0 0 6px 0;font-size:15px;color:var(--accent);}
-    .vital .number{font-family:'VT323', monospace;font-size:28px;color:var(--accent);}
+    .vital h4{font-family:'Cinzel Decorative', serif;margin:0 0 6px 0;font-size:14px;color:var(--accent);}
+    .vital input[type=number]{width:100%;background:transparent;border:none;color:var(--accent);font-family:'VT323',monospace;font-size:20px;text-align:center}
+    .vital .meta{font-size:11px;color:var(--muted);margin-top:6px}
 
     .small-btn{display:inline-block;padding:5px 7px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer;margin-top:6px;font-size:12px}
 
-    /* Area central - a ficha (sem scroll interno) */
+    /* Efeitos (Buffs / Debuffs) */
+    .effects{
+      margin-top:8px;
+      border-top:1px solid rgba(255,255,255,0.03);
+      padding-top:8px;
+      display:flex;flex-direction:column;gap:8px;
+    }
+    .effects-list{list-style:none;padding:0;margin:0;max-height:160px;overflow:auto}
+    .effect-item{padding:6px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;display:flex;justify-content:space-between}
+    .effects-add{display:flex;gap:8px}
+    .effects-add input{flex:1;padding:6px}
+
+    /* Centro: ficha (scrollável sem barra) */
     .center{
       background: rgba(0,0,0,0.6);
       padding:12px;
       box-sizing:border-box;
       height:calc(100vh - 32px);
-      overflow:hidden; 
-      min-width:0; /* evita que conteúdo force overflow horizontal */
+      overflow:auto; /* scrollable invisível */
+      -ms-overflow-style: none;  /* IE/Edge */
+      scrollbar-width: none;  /* Firefox */
     }
+    .center::-webkit-scrollbar{display:none;} /* Chrome/Safari */
 
-    .heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-    .title{font-family:'Cinzel Decorative', serif;font-size:20px;margin-bottom:4px}
-    .meta input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.06);color:var(--accent);padding:6px 8px;width:200px;font-size:13px}
+    .title-wrap{display:flex;justify-content:center;margin-bottom:10px}
+    .title{font-family:'Cinzel Decorative', serif;font-size:22px}
 
-    /* Grid de atributos (ajustado) */
-    .attrs{margin-top:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    /* Informações pessoais (estilo ficha) */
+    .personal{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+    .personal input{width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);font-size:13px}
+
+    /* Grid de atributos */
+    .attrs{margin-top:6px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
     .attr{padding:10px;border:1px solid rgba(255,255,255,0.04);min-width:0}
     .attr h5{margin:0 0 6px 0;font-size:12px;color:var(--muted)}
     .attr .controls{display:flex;align-items:center;gap:6px}
     .attr .val{font-family:'VT323', monospace;font-size:18px;width:42px;text-align:center}
     .attr button{padding:5px 7px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer;font-size:12px}
 
-    /* Perícias/Habilidades e campos textuais */
-    .block{margin-top:12px}
-    textarea{width:100%;min-height:68px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);padding:8px;resize:vertical;font-size:13px}
-    input[type=text]{width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);font-size:13px}
+    /* Perícias / Habilidades - duas colunas */
+    .skill-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .skill-box{border:1px solid rgba(255,255,255,0.04);padding:8px}
+    .skill-box textarea{min-height:120px}
 
-    /* Painel direito - Inventário */
+    /* Condições / Características (grande caixa) */
+    .conditions{margin-top:12px}
+    .conditions textarea{min-height:220px}
+
+    /* Painel direito - inventário avançado */
     .inventory{
       background: rgba(0,0,0,0.6);
       padding:12px;
       box-sizing:border-box;
       height:calc(100vh - 32px);
-      overflow:hidden; /* sem scroll lateral direito */
-      display:flex;
-      flex-direction:column;
+      overflow:hidden;
+      display:flex;flex-direction:column;
     }
-    .inv-list{list-style:none;padding:0;margin:0;flex:0 1 auto;overflow:auto;}
-    .inv-item{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px}
-    .inv-add{margin-top:10px;display:flex;gap:8px}
-    .inv-add input{flex:1;padding:7px;font-size:13px}
+    .inv-list{list-style:none;padding:0;margin:0;flex:1 1 auto;overflow:auto}
+    .inv-item{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);font-size:13px;display:flex;justify-content:space-between;gap:8px}
+    .inv-item .left{flex:1}
+    .inv-item .meta{min-width:68px;text-align:right;color:var(--muted);font-size:13px}
 
-    /* Mensagens estranhas (aparecem somente quando PS baixo) */
-    .strange-msg{margin-top:12px;padding:10px;border-left:3px solid var(--accent-2);color:var(--muted);display:none;font-size:13px}
+    .inv-add{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-top:8px}
+    .inv-add input, .inv-add textarea{padding:6px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);font-size:13px}
+    .inv-add button{padding:6px 8px}
 
-    /* pequenos ajustes para evitar overflow horizontal em elementos internos */
-    input, textarea, .attr, .panel, .inventory, .center {max-width:100%;}
+    /* hide scrollbar visuals for inv-list too */
+    .inv-list::-webkit-scrollbar{display:none}
+    .inv-list{scrollbar-width:none;-ms-overflow-style:none}
 
-    /* Responsividade reduzida (mantém tudo enquadrado) */
+    /* small responsive tweaks */
     @media(max-width:1200px){
-      .wrap{grid-template-columns:220px 1fr 260px;gap:12px;padding:10px}
-      .portrait{height:420px}
-      .title{font-size:18px}
+      .wrap{grid-template-columns:220px 1fr 280px}
+      .portrait{height:320px}
+      .title{font-size:20px}
     }
     @media(max-width:980px){
-      html,body{overflow:auto;} /* em telas bem pequenas permite o scroll da página */
-      .wrap{grid-template-columns:1fr;grid-auto-rows:min-content;padding:12px;}
-      .portrait{height:320px}
-      .center{overflow:visible}
-      .inventory{overflow:visible;height:auto}
+      html,body{overflow:auto;}
+      .wrap{grid-template-columns:1fr;grid-auto-rows:min-content;padding:12px}
+      .portrait{height:240px}
+      .center{height:auto;overflow:visible}
+      .inventory{height:auto;overflow:visible}
     }
 
     .hint{font-size:12px;color:var(--muted);margin-top:8px}
@@ -165,53 +186,44 @@
       <div class="vitals">
         <div class="vital">
           <h4>PV</h4>
-          <div class="number" id="pvDisplay">10</div>
-          <div style="margin-top:8px">
-            <button class="small-btn" id="pvMinus">-</button>
-            <button class="small-btn" id="pvPlus">+</button>
-          </div>
+          <input type="number" id="pvInput" value="10" min="0" />
+          <div class="meta">Max HP: <span id="hpMaxDisplay">10</span></div>
         </div>
 
         <div class="vital">
           <h4>PS</h4>
-          <div class="number" id="psDisplay">50</div>
-          <div style="margin-top:8px">
-            <button class="small-btn" id="psMinus">-</button>
-            <button class="small-btn" id="psPlus">+</button>
-          </div>
+          <input type="number" id="psInput" value="50" min="0" />
         </div>
 
         <div class="vital">
-          <h4>PT</h4>
-          <div class="number" id="ptDisplay">6</div>
-          <div style="margin-top:8px">
-            <button class="small-btn" id="ptMinus">-</button>
-            <button class="small-btn" id="ptPlus">+</button>
-          </div>
+          <h4>Tensão</h4>
+          <input type="number" id="tensionInput" value="6" min="0" />
+          <div class="meta">Calculado a partir de AUR (6 + AUR×2)</div>
         </div>
       </div>
 
-      <div class="hint">Observação: PT aumenta até o limite. Se ultrapassa-lo terá consequências.</div>
+      <div class="effects">
+        <div style="font-size:13px;color:var(--muted)">Efeitos (Buffs / Debuffs)</div>
+        <ul class="effects-list" id="effectsList"></ul>
+        <div class="effects-add">
+          <input id="effectName" placeholder="Nome do efeito (ex: +2 PV temporário)" />
+          <button type="button" class="small-btn" id="effectAdd">+ adicionar</button>
+        </div>
+      </div>
+
     </aside>
 
     <!-- CENTRO: Ficha Principal -->
-    <main class="center">
-      <div class="heading">
-        <div>
-          <div class="title">Ficha — Flagelo Sombrio</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:6px">Preencha campos e ajuste os atributos. Tudo é calculado automaticamente.</div>
-        </div>
+    <main class="center" id="centerPane">
+      <div class="title-wrap"><div class="title">Ficha — Flagelo Sombrio</div></div>
 
-        <div class="meta">
-          <input id="nameField" placeholder="Nome do personagem" />
-        </div>
-      </div>
-
-      <div class="block" style="margin-top:12px">
-        <label style="display:block;margin-bottom:6px;color:var(--muted)">Informações</label>
-        <input id="hometown" type="text" placeholder="Cidade natal" />
-        <div style="height:8px"></div>
-        <textarea id="origin" placeholder="Origem / Passado (escreva algo breve)"></textarea>
+      <div class="personal">
+        <input id="nameField" placeholder="Nome" />
+        <input id="originField" placeholder="Origem" />
+        <input id="ageField" placeholder="Idade" />
+        <input id="heightField" placeholder="Altura" />
+        <input id="eyeField" placeholder="Cor dos olhos" />
+        <div></div>
       </div>
 
       <div class="block">
@@ -221,9 +233,9 @@
           <div class="attr">
             <h5>FOR — Poder Físico</h5>
             <div class="controls">
-              <button data-attr="FOR" class="attr-dec">-</button>
+              <button type="button" data-attr="FOR" class="attr-dec">-</button>
               <div class="val" id="FOR">0</div>
-              <button data-attr="FOR" class="attr-inc">+</button>
+              <button type="button" data-attr="FOR" class="attr-inc">+</button>
             </div>
           </div>
 
@@ -231,9 +243,9 @@
           <div class="attr">
             <h5>AGI — Velocidade e Precisão</h5>
             <div class="controls">
-              <button data-attr="AGI" class="attr-dec">-</button>
+              <button type="button" data-attr="AGI" class="attr-dec">-</button>
               <div class="val" id="AGI">0</div>
-              <button data-attr="AGI" class="attr-inc">+</button>
+              <button type="button" data-attr="AGI" class="attr-inc">+</button>
             </div>
           </div>
 
@@ -241,9 +253,9 @@
           <div class="attr">
             <h5>VIG — Resistência Física</h5>
             <div class="controls">
-              <button data-attr="VIG" class="attr-dec">-</button>
+              <button type="button" data-attr="VIG" class="attr-dec">-</button>
               <div class="val" id="VIG">0</div>
-              <button data-attr="VIG" class="attr-inc">+</button>
+              <button type="button" data-attr="VIG" class="attr-inc">+</button>
             </div>
             <div style="font-size:12px;color:var(--muted);margin-top:8px">HP = 10 + (VIG × 3)</div>
           </div>
@@ -252,9 +264,9 @@
           <div class="attr">
             <h5>INT — Conhecimento e Lógica</h5>
             <div class="controls">
-              <button data-attr="INT" class="attr-dec">-</button>
+              <button type="button" data-attr="INT" class="attr-dec">-</button>
               <div class="val" id="INT">0</div>
-              <button data-attr="INT" class="attr-inc">+</button>
+              <button type="button" data-attr="INT" class="attr-inc">+</button>
             </div>
           </div>
 
@@ -262,33 +274,39 @@
           <div class="attr">
             <h5>AUR — Energia Espiritual</h5>
             <div class="controls">
-              <button data-attr="AUR" class="attr-dec">-</button>
+              <button type="button" data-attr="AUR" class="attr-dec">-</button>
               <div class="val" id="AUR">0</div>
-              <button data-attr="AUR" class="attr-inc">+</button>
+              <button type="button" data-attr="AUR" class="attr-inc">+</button>
             </div>
-            <div style="font-size:12px;color:var(--muted);margin-top:8px">PT = 6 + (AUR × 2) — mínimo 6, máximo 12</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:8px">Tensão = 6 + (AUR × 2) — mínimo 6, máximo 12</div>
           </div>
 
           <!-- CAR -->
           <div class="attr">
             <h5>CAR — Influência Social</h5>
             <div class="controls">
-              <button data-attr="CAR" class="attr-dec">-</button>
+              <button type="button" data-attr="CAR" class="attr-dec">-</button>
               <div class="val" id="CAR">0</div>
-              <button data-attr="CAR" class="attr-inc">+</button>
+              <button type="button" data-attr="CAR" class="attr-inc">+</button>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="block">
-        <label style="display:block;margin-bottom:8px;color:var(--muted)">Perícias / Habilidades</label>
-        <textarea id="skills" placeholder="Liste perícias e habilidades (uma por linha)"></textarea>
+      <div class="skill-row">
+        <div class="skill-box">
+          <label style="display:block;margin-bottom:6px;color:var(--muted)">Perícias</label>
+          <textarea id="skills" placeholder="Liste perícias (uma por linha)"></textarea>
+        </div>
+        <div class="skill-box">
+          <label style="display:block;margin-bottom:6px;color:var(--muted)">Habilidades</label>
+          <textarea id="abilities" placeholder="Liste habilidades (uma por linha)"></textarea>
+        </div>
       </div>
 
-      <div class="block">
-        <label style="display:block;margin-bottom:8px;color:var(--muted)">Observações / Diário</label>
-        <textarea id="notes" placeholder="Notas adicionais"></textarea>
+      <div class="conditions">
+        <label style="display:block;margin-bottom:6px;color:var(--muted)">Condições e Características</label>
+        <textarea id="notes" placeholder="Condições, características e notas importantes"></textarea>
       </div>
 
     </main>
@@ -296,13 +314,13 @@
     <!-- DIREITA: Inventário -->
     <aside class="inventory">
       <h4 style="margin:0 0 8px 0;font-family:'Cinzel Decorative', serif;font-size:16px">Inventário</h4>
-      <ul class="inv-list" id="invList">
-        <!-- itens vão aqui -->
-      </ul>
+      <ul class="inv-list" id="invList"></ul>
 
       <div class="inv-add">
         <input id="invName" placeholder="Nome do item" />
-        <button class="small-btn" id="invAddBtn">+ adicionar</button>
+        <input id="invQty" type="number" placeholder="Qtd" min="1" />
+        <input id="invSpace" placeholder="Espaço/Tipo" />
+        <button type="button" class="small-btn" id="invAddBtn">+ adicionar</button>
       </div>
 
       <div class="strange-msg" id="strangeMsg">"Você não consegue deixar de escutar algo..."</div>
@@ -316,19 +334,18 @@
        LOGICA INTERATIVA
        ----------------------------- */
 
-    // valores iniciais
-
     const state = {
       attrs: {FOR:0, AGI:0, VIG:0, INT:0, AUR:0, CAR:0},
       hpMax:10,
       pv:10,
       ps:50,
-      pt:6,
-      inventory:[]
+      tension:6,
+      inventory:[],
+      effects:[],
+      manualTensionOverride:false
     };
 
-    // helpers
-    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+    const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 
     // DOM refs
     const FORel = document.getElementById('FOR');
@@ -338,39 +355,45 @@
     const AURel = document.getElementById('AUR');
     const CARel = document.getElementById('CAR');
 
-    const pvDisplay = document.getElementById('pvDisplay');
-    const psDisplay = document.getElementById('psDisplay');
-    const ptDisplay = document.getElementById('ptDisplay');
+    const pvInput = document.getElementById('pvInput');
+    const psInput = document.getElementById('psInput');
+    const tensionInput = document.getElementById('tensionInput');
+    const hpMaxDisplay = document.getElementById('hpMaxDisplay');
 
     const portrait = document.getElementById('portrait');
     const strangeMsg = document.getElementById('strangeMsg');
 
-    // mensagens quando PS < 25%
+    const invList = document.getElementById('invList');
+    const effectsList = document.getElementById('effectsList');
+
     const strangePool = [
-      'Você ouviu o seu nome em silêncio.',
+      'Você ouviu o seu nome no silêncio.',
       'Algo escreve na margem do seu pensamento.',
       'Não confie no que a ficha mostra agora.',
-      'O reflexo não combina mais com você.'
+      'O reflexo não combina mais com você.',
+      'Você não parece tão digno de viver aqui.'
     ];
 
+    // recalc: hpMax e tension (a menos que override manual)
     function recalcAll(){
-      // HP
       const vig = state.attrs.VIG;
       state.hpMax = 10 + (vig * 3);
-      state.pv = clamp(state.pv, 0, state.hpMax);
 
-      // PT
-      const aur = state.attrs.AUR;
-      state.pt = clamp(6 + (aur * 2), 6, 12);
+      // tension auto-calc only if not overridden manually
+      if(!state.manualTensionOverride){
+        const aur = state.attrs.AUR;
+        state.tension = clamp(6 + (aur * 2), 6, 12);
+      }
 
-      // PS
-      state.ps = clamp(state.ps, 0, 999);
+      // ensure basic bounds for pv/ps
+      state.pv = Math.max(0, Number(state.pv) || 0);
+      state.ps = Math.max(0, Number(state.ps) || 0);
 
       renderAll();
     }
 
     function renderAll(){
-      // atributos
+      // attrs
       FORel.textContent = state.attrs.FOR;
       AGIel.textContent = state.attrs.AGI;
       VIGel.textContent = state.attrs.VIG;
@@ -378,21 +401,22 @@
       AURel.textContent = state.attrs.AUR;
       CARel.textContent = state.attrs.CAR;
 
-      // vitais
-      pvDisplay.textContent = state.pv + ' / ' + state.hpMax;
-      psDisplay.textContent = state.ps;
-      ptDisplay.textContent = state.pt;
+      // vitals
+      pvInput.value = state.pv;
+      psInput.value = state.ps;
+      tensionInput.value = state.tension;
+      hpMaxDisplay.textContent = state.hpMax;
 
-      // portrait logic
+      // logica do portrait 
       if(state.ps < 25){
         portrait.style.backgroundImage = "var(--portrait-insane)";
-      } else if(state.pv < (state.hpMax/2)){
+      } else if(Number(state.pv) < (state.hpMax/2)){
         portrait.style.backgroundImage = "var(--portrait-injured)";
       } else {
         portrait.style.backgroundImage = "var(--portrait-normal)";
       }
 
-      // strange messages
+      // Mensagens estranhhas
       if(state.ps < 25){
         strangeMsg.style.display = 'block';
         strangeMsg.textContent = '"'+ strangePool[Math.floor(Math.random()*strangePool.length)] + '"';
@@ -401,27 +425,48 @@
       }
 
       renderInventory();
+      renderEffects();
     }
 
-    // funções do inventario 
-    const invList = document.getElementById('invList');
+    // Funções do Inventário
     function renderInventory(){
       invList.innerHTML = '';
       state.inventory.forEach((it, idx)=>{
         const li = document.createElement('li');
         li.className = 'inv-item';
-        li.innerHTML = `<div>${it}</div><div><button data-idx='${idx}' class='small-btn inv-del'>remover</button></div>`;
+        li.innerHTML = `
+          <div class="left"><strong>${escapeHtml(it.name)}</strong><div style="font-size:12px;color:var(--muted)">${escapeHtml(it.space)}</div></div>
+          <div class="meta">x${it.qty} <br><button type="button" data-idx='${idx}' class='small-btn inv-del'>remover</button></div>`;
         invList.appendChild(li);
       });
     }
 
-    // botões dos atributos
+    // effects
+    function renderEffects(){
+      effectsList.innerHTML = '';
+      state.effects.forEach((ef, i)=>{
+        const li = document.createElement('li');
+        li.className = 'effect-item';
+        li.innerHTML = `<div>${escapeHtml(ef)}</div><div><button type="button" data-idx='${i}' class='small-btn eff-del'>x</button></div>`;
+        effectsList.appendChild(li);
+      });
+    }
+
+    // helper escape
+    function escapeHtml(str){
+      if(!str) return '';
+      return String(str).replace(/[&<>"']/g, function(m){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m];});
+    }
+
+    // Botões de atributos
     document.querySelectorAll('.attr-inc').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const a = btn.getAttribute('data-attr');
         const curr = state.attrs[a];
         if(curr < 3){
           state.attrs[a] = curr + 1;
+          // se AUR mudar, muda o estado da Tensão
+          if(a === 'AUR') state.manualTensionOverride = false;
           recalcAll();
         }
       });
@@ -432,28 +477,27 @@
         const curr = state.attrs[a];
         if(curr > 0){
           state.attrs[a] = curr - 1;
+          if(a === 'AUR') state.manualTensionOverride = false;
           recalcAll();
         }
       });
     });
 
-    // PV / PS / PT manual adjustments
-    document.getElementById('pvPlus').addEventListener('click', ()=>{ state.pv = clamp(state.pv+1, 0, state.hpMax); renderAll(); });
-    document.getElementById('pvMinus').addEventListener('click', ()=>{ state.pv = clamp(state.pv-1, 0, state.hpMax); renderAll(); });
-
-    document.getElementById('psPlus').addEventListener('click', ()=>{ state.ps = state.ps+1; renderAll(); });
-    document.getElementById('psMinus').addEventListener('click', ()=>{ state.ps = Math.max(0, state.ps-1); renderAll(); });
-
-    // PT adjustments
-    document.getElementById('ptPlus').addEventListener('click', ()=>{ state.pt = clamp(state.pt+1, 6, 12); renderAll(); });
-    document.getElementById('ptMinus').addEventListener('click', ()=>{ state.pt = clamp(state.pt-1, 6, 12); renderAll(); });
+    // inputs para PV / PS / Tensão
+    pvInput.addEventListener('input', ()=>{ state.pv = pvInput.value === '' ? 0 : Number(pvInput.value); renderAll(); });
+    psInput.addEventListener('input', ()=>{ state.ps = psInput.value === '' ? 0 : Number(psInput.value); renderAll(); });
+    tensionInput.addEventListener('input', ()=>{ state.tension = tensionInput.value === '' ? 0 : Number(tensionInput.value); state.manualTensionOverride = true; renderAll(); });
 
     // inventario add/remove
     document.getElementById('invAddBtn').addEventListener('click', ()=>{
       const name = document.getElementById('invName').value.trim();
+      const qty = Number(document.getElementById('invQty').value) || 1;
+      const space = document.getElementById('invSpace').value.trim() || '';
       if(!name) return;
-      state.inventory.push(name);
+      state.inventory.push({name, qty, space});
       document.getElementById('invName').value = '';
+      document.getElementById('invQty').value = '';
+      document.getElementById('invSpace').value = '';
       renderAll();
     });
 
@@ -465,8 +509,26 @@
       }
     });
 
-    // initialize
+    // efeito add/remove
+    document.getElementById('effectAdd').addEventListener('click', ()=>{
+      const name = document.getElementById('effectName').value.trim();
+      if(!name) return;
+      state.effects.push(name);
+      document.getElementById('effectName').value = '';
+      renderAll();
+    });
+
+    effectsList.addEventListener('click', (e)=>{
+      if(e.target.classList.contains('eff-del')){
+        const idx = Number(e.target.getAttribute('data-idx'));
+        state.effects.splice(idx,1);
+        renderAll();
+      }
+    });
+
+    // init
     recalcAll();
+
   </script>
 </body>
 </html>
