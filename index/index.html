@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ficha Flagelo-Sombrio (Protótipo)</title>
+
+  <!-- Fonts: Titulos, Texto e Numeros -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Spectral:wght@300;400;600&family=VT323&display=swap" rel="stylesheet">
+
+  <style>
+    /* -----------------------------
+       CONFIGURAÇÕES GLOBAIS
+       Fundo totalmente preto; existe um slot para imagem de background, talvez eu troque depois
+       ----------------------------- */
+    :root{
+      --accent: #eaeaea; /* texto frio */
+      --accent-2: #7b0000; /* vermelho seco para divisores */
+      --muted: #bdbdbd;
+      --bg-image: url('background-template.jpg'); /* troque esse arquivo para adicionar imagem de fundo */
+      --portrait-normal: url('portrait_normal.png');
+      --portrait-injured: url('portrait_injured.png');
+      --portrait-insane: url('portrait_insane.png');
+    }
+
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: 'Spectral', serif;
+      background: #000 center/cover no-repeat, var(--bg-image) center/cover no-repeat;
+      /* A imagem de fundo é opcional — se não existir, fica totalmente preta */
+      background-blend-mode: multiply; /* use com cuidado — sem sombras internas */
+      color:var(--accent);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* Layout em três colunas fixas */
+    .wrap{
+      display:grid;
+      grid-template-columns: 300px 1fr 320px;
+      gap:24px;
+      padding:28px;
+      height:100vh;
+      box-sizing:border-box;
+    }
+
+    /* Painel esquerdo - Vital */
+    .panel{
+      background: rgba(0,0,0,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+      padding:18px;
+      box-sizing:border-box;
+    }
+
+    .portrait{
+      width:100%;
+      height:420px;
+      background-image:var(--portrait-normal);
+      background-size:cover;
+      background-position:center;
+      border:1px solid rgba(255,255,255,0.04);
+      margin-bottom:12px;
+    }
+
+    .vitals{
+      display:flex;
+      gap:12px;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .vital{
+      flex:1;
+      text-align:center;
+      padding:10px 8px;
+      border:1px dashed rgba(255,255,255,0.03);
+    }
+
+    .vital h4{font-family:'Cinzel Decorative', serif;margin:0 0 6px 0;font-size:18px;color:var(--accent);}
+    .vital .number{font-family:'VT323', monospace;font-size:34px;color:var(--accent);}
+
+    .small-btn{display:inline-block;padding:6px 8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer;margin-top:8px;font-size:13px}
+
+    /* Area central - A Ficha de fato */
+    .center{
+      background: rgba(0,0,0,0.6);
+      padding:18px;
+      box-sizing:border-box;
+      overflow:auto;
+    }
+
+    .heading{display:flex;justify-content:space-between;align-items:center}
+    .title{font-family:'Cinzel Decorative', serif;font-size:28px;}
+    .meta input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,0.06);color:var(--accent);padding:6px 8px;width:220px}
+
+    /* Grid de atributos */
+    .attrs{margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .attr{padding:12px;border:1px solid rgba(255,255,255,0.04);}
+    .attr h5{margin:0 0 8px 0;font-size:13px;color:var(--muted)}
+    .attr .controls{display:flex;align-items:center;gap:8px}
+    .attr .val{font-family:'VT323', monospace;font-size:22px;width:46px;text-align:center}
+    .attr button{padding:6px 8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer}
+
+    /* Pericias/Habilidades e campos textuais */
+    .block{margin-top:16px}
+    textarea{width:100%;min-height:90px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);padding:8px;resize:vertical}
+    input[type=text]{width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent)}
+
+    /* Painel direito - Inventário */
+    .inventory{background: rgba(0,0,0,0.6);padding:18px;box-sizing:border-box;height:100%;overflow:auto}
+    .inv-list{list-style:none;padding:0;margin:0}
+    .inv-item{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .inv-add{margin-top:12px;display:flex;gap:8px}
+    .inv-add input{flex:1}
+
+    /* Mensagens estranhas (aparecem somente quando PS baixo) */
+    .strange-msg{margin-top:12px;padding:10px;border-left:3px solid var(--accent-2);color:var(--muted);display:none}
+
+    /* Responsividade */
+    @media(max-width:980px){
+      .wrap{grid-template-columns:1fr;grid-auto-rows:min-content;padding:12px;}
+      .portrait{height:320px}
+    }
+
+    /* pequenas instruções em rodapé do painel */
+    .hint{font-size:12px;color:var(--muted);margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- ESQUERDA: Painel Vital -->
+    <aside class="panel">
+      <div class="portrait" id="portrait" title="Retrato do personagem"></div>
+
+      <div class="vitals">
+        <div class="vital">
+          <h4>PV</h4>
+          <div class="number" id="pvDisplay">10</div>
+          <div style="margin-top:8px">
+            <button class="small-btn" id="pvMinus">-</button>
+            <button class="small-btn" id="pvPlus">+</button>
+          </div>
+        </div>
+
+        <div class="vital">
+          <h4>PS</h4>
+          <div class="number" id="psDisplay">50</div>
+          <div style="margin-top:8px">
+            <button class="small-btn" id="psMinus">-</button>
+            <button class="small-btn" id="psPlus">+</button>
+          </div>
+        </div>
+
+        <div class="vital">
+          <h4>PT</h4>
+          <div class="number" id="ptDisplay">6</div>
+          <div style="margin-top:8px">
+            <button class="small-btn" id="ptMinus">-</button>
+            <button class="small-btn" id="ptPlus">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="hint">Observação: PT aumenta (não diminui) até o limite. Edite atributos no centro para recalcular automaticamente.</div>
+    </aside>
+
+    <!-- CENTRO: Ficha Principal -->
+    <main class="center">
+      <div class="heading">
+        <div>
+          <div class="title">Ficha — Horror RPG</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:6px">Preencha campos e ajuste atributos (0–3). PV e PT são calculados automaticamente.</div>
+        </div>
+
+        <div class="meta">
+          <input id="nameField" placeholder="Nome do personagem" />
+        </div>
+      </div>
+
+      <div class="block" style="margin-top:14px">
+        <label style="display:block;margin-bottom:6px;color:var(--muted)">Informações</label>
+        <input id="hometown" type="text" placeholder="Cidade natal" />
+        <div style="height:8px"></div>
+        <textarea id="origin" placeholder="Origem / Passado (escreva algo breve)"></textarea>
+      </div>
+
+      <div class="block">
+        <label style="display:block;margin-bottom:8px;color:var(--muted)">Atributos (0 a 3)</label>
+        <div class="attrs">
+          <!-- FOR -->
+          <div class="attr">
+            <h5>FOR — Poder Físico</h5>
+            <div class="controls">
+              <button data-attr="FOR" class="attr-dec">-</button>
+              <div class="val" id="FOR">0</div>
+              <button data-attr="FOR" class="attr-inc">+</button>
+            </div>
+          </div>
+
+          <!-- AGI -->
+          <div class="attr">
+            <h5>AGI — Velocidade e Precisão</h5>
+            <div class="controls">
+              <button data-attr="AGI" class="attr-dec">-</button>
+              <div class="val" id="AGI">0</div>
+              <button data-attr="AGI" class="attr-inc">+</button>
+            </div>
+          </div>
+
+          <!-- VIG -->
+          <div class="attr">
+            <h5>VIG — Resistência Física</h5>
+            <div class="controls">
+              <button data-attr="VIG" class="attr-dec">-</button>
+              <div class="val" id="VIG">0</div>
+              <button data-attr="VIG" class="attr-inc">+</button>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:8px">HP = 10 + (VIG × 3)</div>
+          </div>
+
+          <!-- INT -->
+          <div class="attr">
+            <h5>INT — Conhecimento e Lógica</h5>
+            <div class="controls">
+              <button data-attr="INT" class="attr-dec">-</button>
+              <div class="val" id="INT">0</div>
+              <button data-attr="INT" class="attr-inc">+</button>\            </div>
+          </div>
+
+          <!-- AUR -->
+          <div class="attr">
+            <h5>AUR — Poder Sobrenatural</h5>
+            <div class="controls">
+              <button data-attr="AUR" class="attr-dec">-</button>
+              <div class="val" id="AUR">0</div>
+              <button data-attr="AUR" class="attr-inc">+</button>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:8px">PT = 6 + (AUR × 2) — mínimo 6, máximo 12</div>
+          </div>
+
+          <!-- CAR -->
+          <div class="attr">
+            <h5>CAR — Influência Social</h5>
+            <div class="controls">
+              <button data-attr="CAR" class="attr-dec">-</button>
+              <div class="val" id="CAR">0</div>
+              <button data-attr="CAR" class="attr-inc">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <label style="display:block;margin-bottom:8px;color:var(--muted)">Perícias / Habilidades</label>
+        <textarea id="skills" placeholder="Liste perícias e habilidades (uma por linha)"></textarea>
+      </div>
+
+      <div class="block">
+        <label style="display:block;margin-bottom:8px;color:var(--muted)">Observações / Diário</label>
+        <textarea id="notes" placeholder="Notas adicionais"></textarea>
+      </div>
+
+    </main>
+
+    <!-- DIREITA: Inventário -->
+    <aside class="inventory">
+      <h4 style="margin:0 0 8px 0;font-family:'Cinzel Decorative', serif">Inventário</h4>
+      <ul class="inv-list" id="invList">
+        <!-- itens vão aqui -->
+      </ul>
+
+      <div class="inv-add">
+        <input id="invName" placeholder="Nome do item" />
+        <button class="small-btn" id="invAddBtn">+ adicionar</button>
+      </div>
+
+      <div class="strange-msg" id="strangeMsg">"Você não consegue deixar de escutar algo..."</div>
+
+      <div class="hint">Mensagens estranhas aparecem apenas quando PS estiver baixa (PS &lt; 25).</div>
+    </aside>
+
+  </div>
+
+  <script>
+    /* -----------------------------
+       LOGICA INTERATIVA
+       - atributos 0..3
+       - calculos: HP = 10 + VIG*3
+                 PT = clamp(6 + AUR*2, 6, 12)
+       - PS base 50
+       - PT aumenta (ptPlus button) até limite; ptMinus reduz por erro admin
+       - portrait troca com base nos thresholds
+       - mensagens estranhas aparecem quando PS < 25
+       ----------------------------- */
+
+    // valores iniciais
+    const state = {
+      attrs: {FOR:0, AGI:0, VIG:0, INT:0, AUR:0, CAR:0},
+      hpMax:10,
+      pv:10,
+      ps:50,
+      pt:6,
+      inventory:[]
+    };
+
+    // helpers
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+    // DOM refs
+    const FORel = document.getElementById('FOR');
+    const AGIel = document.getElementById('AGI');
+    const VIGel = document.getElementById('VIG');
+    const INTel = document.getElementById('INT');
+    const AURel = document.getElementById('AUR');
+    const CARel = document.getElementById('CAR');
+
+    const pvDisplay = document.getElementById('pvDisplay');
+    const psDisplay = document.getElementById('psDisplay');
+    const ptDisplay = document.getElementById('ptDisplay');
+
+    const portrait = document.getElementById('portrait');
+    const strangeMsg = document.getElementById('strangeMsg');
+
+    // messages quando PS < 25
+    const strangePool = [
+      'Você ouviu o seu nome em silêncio.',
+      'Algo escreve na margem do seu pensamento.',
+      'Não confie no que a ficha mostra agora.',
+      'O reflexo não combina mais com você.'
+    ];
+
+    function recalcAll(){
+      // HP
+      const vig = state.attrs.VIG;
+      state.hpMax = 10 + (vig * 3);
+      // Se pv > novo max, ajustar
+      state.pv = clamp(state.pv, 0, state.hpMax);
+
+      // PT
+      const aur = state.attrs.AUR;
+      state.pt = clamp(6 + (aur * 2), 6, 12);
+
+      // PS permanece livre (pode variar), mas tem base 50
+      state.ps = clamp(state.ps, 0, 999);
+
+      renderAll();
+    }
+
+    function renderAll(){
+      // atributos
+      FORel.textContent = state.attrs.FOR;
+      AGIel.textContent = state.attrs.AGI;
+      VIGel.textContent = state.attrs.VIG;
+      INTel.textContent = state.attrs.INT;
+      AURel.textContent = state.attrs.AUR;
+      CARel.textContent = state.attrs.CAR;
+
+      // vitais
+      pvDisplay.textContent = state.pv + ' / ' + state.hpMax;
+      psDisplay.textContent = state.ps;
+      ptDisplay.textContent = state.pt;
+
+      // portrait logic:
+      // - if PS < 25 => insane portrait
+      // - else if PV < 50% of max => injured portrait
+      // - else normal
+      if(state.ps < 25){
+        portrait.style.backgroundImage = "var(--portrait-insane)";
+      } else if(state.pv < (state.hpMax/2)){
+        portrait.style.backgroundImage = "var(--portrait-injured)";
+      } else {
+        portrait.style.backgroundImage = "var(--portrait-normal)";
+      }
+
+      // strange messages
+      if(state.ps < 25){
+        strangeMsg.style.display = 'block';
+        strangeMsg.textContent = '"'+ strangePool[Math.floor(Math.random()*strangePool.length)] + '"';
+      } else {
+        strangeMsg.style.display = 'none';
+      }
+
+      // inventory
+      renderInventory();
+    }
+
+    // inventory functions
+    const invList = document.getElementById('invList');
+    function renderInventory(){
+      invList.innerHTML = '';
+      state.inventory.forEach((it, idx)=>{
+        const li = document.createElement('li');
+        li.className = 'inv-item';
+        li.innerHTML = `<div>${it}</div><div><button data-idx='${idx}' class='small-btn inv-del'>remover</button></div>`;
+        invList.appendChild(li);
+      });
+    }
+
+    // attribute buttons
+    document.querySelectorAll('.attr-inc').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const a = btn.getAttribute('data-attr');
+        const curr = state.attrs[a];
+        if(curr < 3){
+          state.attrs[a] = curr + 1;
+          // quando VIG muda, recalcular HP; quando AUR muda, recalcular PT
+          recalcAll();
+        }
+      });
+    });
+    document.querySelectorAll('.attr-dec').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const a = btn.getAttribute('data-attr');
+        const curr = state.attrs[a];
+        if(curr > 0){
+          state.attrs[a] = curr - 1;
+          recalcAll();
+        }
+      });
+    });
+
+    // PV / PS / PT manual adjustments
+    document.getElementById('pvPlus').addEventListener('click', ()=>{ state.pv = clamp(state.pv+1, 0, state.hpMax); renderAll(); });
+    document.getElementById('pvMinus').addEventListener('click', ()=>{ state.pv = clamp(state.pv-1, 0, state.hpMax); renderAll(); });
+
+    document.getElementById('psPlus').addEventListener('click', ()=>{ state.ps = state.ps+1; renderAll(); });
+    document.getElementById('psMinus').addEventListener('click', ()=>{ state.ps = Math.max(0, state.ps-1); renderAll(); });
+
+    // PT aumenta com ptPlus, até limite; ptMinus permite reduzir manualmente (use com cuidado)
+    document.getElementById('ptPlus').addEventListener('click', ()=>{ state.pt = clamp(state.pt+1, 6, 12); renderAll(); });
+    document.getElementById('ptMinus').addEventListener('click', ()=>{ state.pt = clamp(state.pt-1, 6, 12); renderAll(); });
+
+    // inventario add/remove
+    document.getElementById('invAddBtn').addEventListener('click', ()=>{
+      const name = document.getElementById('invName').value.trim();
+      if(!name) return;
+      state.inventory.push(name);
+      document.getElementById('invName').value = '';
+      renderAll();
+    });
+
+    invList.addEventListener('click', (e)=>{
+      if(e.target.classList.contains('inv-del')){
+        const idx = Number(e.target.getAttribute('data-idx'));
+        state.inventory.splice(idx,1);
+        renderAll();
+      }
+    });
+
+    // initialize
+    recalcAll();
+
+
+  </script>
+</body>
+</html>
