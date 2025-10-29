@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ficha Flagelo-Sombrio (Otimizada + LocalStorage)</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Spectral:wght@300;400;600&family=VT323&display=swap" rel="stylesheet">
+
+  <style>
+  /* === BOTÕES GERAIS === */
+  button {
+    background: linear-gradient(145deg, #111 0%, #1b1b1b 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--accent);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: inset 0 0 4px rgba(255,255,255,0.05), 0 0 6px rgba(0,0,0,0.5);
+  }
+
+  button:hover {
+    background: linear-gradient(145deg, #1d1d1d 0%, #262626 100%);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 0 8px rgba(255,255,255,0.08);
+    transform: translateY(-1px);
+  }
+
+  button:active {
+    background: linear-gradient(145deg, #0a0a0a 0%, #151515 100%);
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.8);
+    transform: translateY(0);
+  }
+
+  /* === BOTÃO DO MENU (☰) === */
+  #libraryToggle {
+    background: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--accent);
+    font-size: 18px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.6);
+  }
+
+  #libraryToggle:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* === MENU DA BIBLIOTECA === */
+  .library-menu {
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 10px rgba(0,0,0,0.6);
+  }
+
+  .library-menu h4 {
+    margin: 0 0 6px 0;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 14px;
+    color: var(--accent);
+    text-align: center;
+  }
+
+  .library-menu button {
+    width: 100%;
+    margin-top: 4px;
+    font-size: 12px;
+  }
+
+  /* === BOTÕES NO TOPO (Salvar / Limpar) === */
+  .top-actions button {
+    font-family: 'Cinzel Decorative', serif;
+    background: linear-gradient(145deg, #111, #1c1c1c);
+    border: 1px solid rgba(255, 0, 0, 0.1);
+    border-radius: 6px;
+    color: var(--accent);
+    padding: 6px 12px;
+    text-transform: uppercase;
+    font-size: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .top-actions button:hover {
+    background: linear-gradient(145deg, #222, #333);
+    border-color: rgba(255,255,255,0.2);
+    box-shadow: 0 0 6px rgba(255,255,255,0.1);
+  }
+
+  .top-actions button:active {
+    background: #0a0a0a;
+    transform: translateY(1px);
+  }
+    
+    :root{
+      --accent:#eaeaea;--muted:#bbbbbb;--bg:#080808;
+      --pv-color:#8b0000;--ps-color:#4b6576;--tension-color:#8a0715;
+      --panel-bg:rgba(0,0,0,0.6);--edge:rgba(255,255,255,0.03);
+    }
+
+    /* Para navegadores WebKit (Chrome, Edge, Safari) */
+    ::-webkit-scrollbar {
+        width: 6px;  /* largura da barra vertical */
+        height: 6px; /* altura da barra horizontal */
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #1a1a1a;  /* cor do fundo da barra */
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #555; /* cor do "dedo" da barra */
+        border-radius: 3px;
+        border: 1px solid #1a1a1a; /* cria um efeito de recorte */
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #888; /* cor ao passar o mouse */
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;padding:0;background:var(--bg);color:var(--accent);font-family:'Spectral',serif}
+    body{font-size:14px;-webkit-font-smoothing:antialiased}
+
+    .wrap{display:grid;grid-template-columns:240px 1fr 320px;gap:18px;padding:16px;height:100vh;min-width:0}
+    .panel,.center,.inventory{background:var(--panel-bg);border:1px solid var(--edge);padding:12px;height:calc(100vh - 32px);overflow:auto}
+    .panel{display:flex;flex-direction:column;gap:12px}
+
+    .portrait{width:100%;height:360px;background-size:cover;background-position:center;border:1px solid rgba(255,255,255,0.04)}
+
+    .vitals{display:flex;flex-direction:column;gap:10px}
+    .vital{padding:6px;border:1px dashed var(--edge);position:relative}
+    .vital h4{font-family:'Cinzel Decorative',serif;margin:0 0 6px 0;font-size:14px;color:var(--accent)}
+
+    input[type=number]{-moz-appearance:textfield;-webkit-appearance:none;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--accent);font-family:VT323,monospace;font-size:16px;width:100%;text-align:center}
+    input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+
+    .bar-wrap{background:rgba(255,255,255,0.03);height:12px;border-radius:4px;margin-top:8px;overflow:hidden}
+    .bar-fill{height:100%;width:0%;transition:width .5s cubic-bezier(.2,.9,.2,1)}
+    .bar-ps .bar-fill{background:var(--ps-color)}
+    .bar-tension .bar-fill{background:var(--tension-color)}
+    .bar-pv .bar-fill{background:var(--pv-color)}
+
+    .bar-label{position:absolute;right:10px;top:6px;font-family:VT323,monospace;font-size:13px;color:var(--muted)}
+
+    .effects{flex:1;display:flex;flex-direction:column;gap:8px}
+    .effects textarea{flex:1;min-height:120px;padding:8px;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.03);color:var(--accent);resize:vertical}
+
+    .center{overflow:auto;min-width:0}
+    .title{font-family:'Cinzel Decorative',serif;font-size:22px;text-align:center;margin-bottom:10px}
+
+    .personal{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+    .personal input{width:100%;padding:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);font-size:13px}
+
+    .attrs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .attr{padding:10px;border:1px solid rgba(255,255,255,0.04)}
+    .attr h5{margin:0 0 6px 0;font-size:12px;color:var(--muted)}
+    .controls{display:flex;align-items:center;gap:6px}
+    .val{font-family:'VT323',monospace;font-size:18px;width:46px;text-align:center;background:transparent;border:none;color:var(--accent)}
+    .attr button{padding:5px 7px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer;font-size:12px}
+
+    .skill-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .skill-box{background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.03);padding:8px}
+    .skill-box textarea{width:100%;min-height:120px;padding:8px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.03);color:var(--accent);resize:vertical}
+
+    .conditions{display: flex; flex-direction: column; gap: 6px;}
+    .conditions .subtitle{font-size:16px;text-align:center;font-family:'Cinzel Decorative',serif}
+    .conditions textarea{flex: 1; min-height:260px;padding:10px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.03);color:var(--accent);resize:vertical}
+
+    .inv-add{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px}
+    .inv-add input{padding:6px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--accent)}
+    .inv-add button{padding:6px 8px}
+    .inv-list{list-style:none;padding:0;margin:0;overflow:auto}
+    .inv-item{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px solid rgba(255,255,255,0.03);gap:8px}
+    .inv-item .meta{min-width:68px;text-align:right;color:var(--muted);font-size:13px}
+
+    .top-actions{display:flex;justify-content:flex-end;gap:8px;margin-bottom:8px}
+    .top-actions button{padding:6px 10px}
+
+    @media(max-width:1200px){.wrap{grid-template-columns:220px 1fr 280px}.portrait{height:320px}.title{font-size:20px}}
+    @media(max-width:980px){html,body{overflow:auto}.wrap{grid-template-columns:1fr;grid-auto-rows:min-content;padding:12px}.portrait{height:240px}.center{height:auto}.inventory{height:auto}}
+  </style>
+</head>
+<body>
+  <!-- Botão de abrir biblioteca -->
+  <button id="libraryToggle" style="position:absolute;top:10px;left:10px;z-index:1000;">☰</button>
+
+  <!-- Menu da biblioteca -->
+  <div class="library-menu" style="position:absolute;top:40px;left:10px;background:var(--panel-bg);padding:8px;border:1px solid var(--edge);display:none;z-index:1000;">
+  <h4>Biblioteca</h4>
+  <ul id="fichaList" style="list-style:none;padding:0;margin:0;"></ul>
+  <button id="newFichaBtn" style="margin-top:6px;">+ Nova Ficha</button>
+  </div>
+
+  <div class="wrap">
+
+    <!-- ESQUERDA -->
+    <aside class="panel">
+      <div class="portrait" id="portrait" style="--portrait-normal:url('');--portrait-injured:url('');--portrait-insane:url('')"></div>
+
+      <div class="vitals">
+        <div class="vital">
+          <h4>PV</h4>
+          <div class="bar-label"><span id="pvLabel">10/10</span></div>
+          <input type="number" id="pvInput" value="10" min="0" />
+          <div class="bar-wrap bar-pv" aria-hidden="true"><div id="pvBar" class="bar-fill"></div></div>
+        </div>
+
+        <div class="vital">
+          <h4>PS</h4>
+          <div class="bar-label"><span id="psLabel">50/100</span></div>
+          <input type="number" id="psInput" value="50" min="0" />
+          <div class="bar-wrap bar-ps" aria-hidden="true"><div id="psBar" class="bar-fill"></div></div>
+        </div>
+
+        <div class="vital">
+          <h4>Tensão</h4>
+          <div class="bar-label"><span id="tensionLabel">6/12</span></div>
+          <input type="number" id="tensionInput" value="6" min="0" />
+          <div class="bar-wrap bar-tension" aria-hidden="true"><div id="tensionBar" class="bar-fill"></div></div>
+        </div>
+      </div>
+
+      <div class="effects">
+        <div style="font-size:13px;color:var(--muted)">Efeitos (Buffs / Debuffs)</div>
+        <textarea id="effectsField" placeholder="Escreva efeitos, buffs e debuffs livremente..."></textarea>
+      </div>
+    </aside>
+
+    <!-- CENTRO -->
+    <main class="center" id="centerPane">
+      <div class="top-actions"><button id="saveBtn">Salvar ficha</button><button id="clearBtn">Limpar ficheiro</button></div>
+      <div class="title">Ficha — Flagelo Sombrio</div>
+
+      <div class="personal">
+        <input id="nameField" placeholder="Nome" />
+        <input id="originField" placeholder="Origem" />
+        <input id="ageField" placeholder="Idade" />
+        <input id="heightField" placeholder="Altura" />
+        <input id="eyeField" placeholder="Cor dos olhos" />
+        <div></div>
+      </div>
+
+      <label style="display:block;margin-bottom:8px;color:var(--muted)">Atributos (0 a 10)</label>
+      <div class="attrs" id="attrs">
+        <!-- cada .attr usa data-attr para simplificar eventos -->
+        <div class="attr" data-attr="FOR"><h5>FOR — Poder Físico</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+        <div class="attr" data-attr="AGI"><h5>AGI — Velocidade e Precisão</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+        <div class="attr" data-attr="VIG"><h5>VIG — Resistência Física</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+
+        <div class="attr" data-attr="INT"><h5>INT — Conhecimento e Lógica</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+        <div class="attr" data-attr="AUR"><h5>AUR — Energia Espiritual</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+        <div class="attr" data-attr="CAR"><h5>CAR — Influência Social</h5><div class="controls"><button data-action="dec">-</button><input class="val" readonly value="0"><button data-action="inc">+</button></div></div>
+      </div>
+
+      <div class="skill-row">
+        <div class="skill-box"><label>Perícias</label><textarea id="skills" placeholder="Liste perícias (uma por linha)"></textarea></div>
+        <div class="skill-box"><label>Habilidades</label><textarea id="abilities" placeholder="Liste habilidades (uma por linha)"></textarea></div>
+      </div>
+
+      <div class="conditions"><div class="subtitle">Condições e Características</div><textarea id="notes" placeholder="Condições, características e notas importantes"></textarea></div>
+    </main>
+
+    <!-- DIREITA: inventory -->
+    <aside class="inventory">
+      <h4 style="margin:0 0 8px 0;font-family:'Cinzel Decorative',serif;font-size:16px">Inventário</h4>
+
+      <div class="inv-add">
+        <input id="invName" placeholder="Nome do item" />
+        <input id="invQty" type="number" placeholder="Qtd" min="1" />
+        <input id="invSpace" placeholder="Espaço/Tipo" />
+        <button type="button" id="invAddBtn">+ adicionar</button>
+      </div>
+
+      <ul class="inv-list" id="invList"></ul>
+    </aside>
+  </div>
+    <script src="JS.js"></script>
+</body>
+</html>
