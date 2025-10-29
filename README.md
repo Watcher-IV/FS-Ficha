@@ -7,4 +7,4 @@ Ficha Automática atualizada.
  ° Layout melhorado
  ° Erro matemático concertado
 
-*Aviso:* O bug que não permite aumentar o valor total de "Tenasão" está sendo corrigido
+*Aviso:* O bug que não permite aumentar o valor total de "Tensão" está sendo corrigido
