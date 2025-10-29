@@ -19,54 +19,202 @@
   const invList = q('#invList');
   const attrsWrap = q('#attrs');
 
-  // persistence: save/load
-  function saveToStorage(){
-    // copy minimal serializable state
-    const out = {
-      attrs: state.attrs,
-      pv: state.pv, ps: state.ps, tension: state.tension,
-      inventory: state.inventory,
-      personal: state.personal,
-      skills: q('#skills').value,
-      abilities: q('#abilities').value,
-      notes: q('#notes').value,
-      effects: q('#effectsField').value
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(out));
+
+// Elementos do menu (se existirem no HTML)
+const libraryMenu = q('.library-menu');
+const libraryToggle = q('#libraryToggle');
+const fichaList = q('#fichaList');
+const newFichaBtn = q('#newFichaBtn');
+
+// -------------------------------
+// Funções de Armazenamento
+// -------------------------------
+function getRawStorage() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn('Erro ao ler localStorage', e);
+    return null;
+  }
+}
+
+function getAllFichas() {
+  const raw = getRawStorage();
+  if (!raw) return { fichas: {}, lastActive: '' };
+
+  if (raw && typeof raw === 'object' && raw.fichas && typeof raw.fichas === 'object') {
+    return raw; // formato novo
   }
 
-  function loadFromStorage(){
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(!raw) return false;
-    try{
-      const o = JSON.parse(raw);
-      if(o.attrs) state.attrs = Object.assign(state.attrs, o.attrs);
-      if(typeof o.pv==='number' || typeof o.pv==='string') state.pv = Number(o.pv);
-      if(typeof o.ps==='number' || typeof o.ps==='string') state.ps = Number(o.ps);
-      if(typeof o.tension==='number' || typeof o.tension==='string') state.tension = Number(o.tension);
-      if(Array.isArray(o.inventory)) state.inventory = o.inventory.slice();
-      if(o.personal) state.personal = Object.assign(state.personal, o.personal);
-      if(typeof o.skills==='string') q('#skills').value = o.skills;
-      if(typeof o.abilities==='string') q('#abilities').value = o.abilities;
-      if(typeof o.notes==='string') q('#notes').value = o.notes;
-      if(typeof o.effects==='string') q('#effectsField').value = o.effects;
-      return true;
-    }catch(e){ console.warn('load failed',e); return false; }
+  // --- MIGRAÇÃO AUTOMÁTICA (formato antigo → novo)
+  const name =
+    (state.personal && state.personal.name && state.personal.name.trim()) ||
+    'Ficha-1';
+  const migrated = { fichas: {}, lastActive: name };
+  migrated.fichas[name] = raw;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+  console.log('Dados antigos migrados para formato de múltiplas fichas');
+  return migrated;
+}
+
+// -------------------------------
+// Salvamento / Carregamento
+// -------------------------------
+function saveToStorage(silent = false) {
+  const allData = getAllFichas();
+  const name =
+    (state.personal && state.personal.name && state.personal.name.trim()) ||
+    `Autosave_${new Date().toISOString().replace(/[:.]/g, '-')}`;
+
+  allData.fichas[name] = {
+    attrs: state.attrs,
+    pv: state.pv,
+    ps: state.ps,
+    tension: state.tension,
+    inventory: state.inventory,
+    personal: state.personal,
+    skills: q('#skills')?.value || '',
+    abilities: q('#abilities')?.value || '',
+    notes: q('#notes')?.value || '',
+    effects: q('#effectsField')?.value || '',
+  };
+  allData.lastActive = name;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+  if (!silent) alert(`Ficha "${name}" salva!`);
+  updateFichaList();
+}
+
+function loadFicha(name) {
+  const allData = getAllFichas();
+  const ficha = allData.fichas[name];
+  if (!ficha) return false;
+
+  Object.assign(state.attrs, ficha.attrs);
+  state.pv = ficha.pv;
+  state.ps = ficha.ps;
+  state.tension = ficha.tension;
+  state.inventory = ficha.inventory.slice();
+  state.personal = Object.assign({}, ficha.personal);
+
+  q('#skills').value = ficha.skills || '';
+  q('#abilities').value = ficha.abilities || '';
+  q('#notes').value = ficha.notes || '';
+  q('#effectsField').value = ficha.effects || '';
+
+  // atualiza campos pessoais
+  q('#nameField').value = state.personal.name || '';
+  q('#originField').value = state.personal.origin || '';
+  q('#ageField').value = state.personal.age || '';
+  q('#heightField').value = state.personal.height || '';
+  q('#eyeField').value = state.personal.eye || '';
+
+  recalc();
+  return true;
+}
+
+// -------------------------------
+// Interface da Biblioteca
+// -------------------------------
+function getFichaNames() {
+  return Object.keys(getAllFichas().fichas);
+}
+
+function updateFichaList() {
+  if (!fichaList) return;
+  const names = getFichaNames();
+  if (names.length === 0) {
+    fichaList.innerHTML = `<li style="color:#aaa;font-style:italic;">Nenhuma ficha salva</li>`;
+    return;
   }
 
-  // simple numeric animation helper
-  function animateNumber(el, from, to, duration=400){
-    const start = performance.now();
-    const diff = to - from;
-    function frame(now){
-      const t = Math.min(1, (now - start)/duration);
-      const v = Math.round(from + diff * (1 - Math.pow(1 - t,3))); // easeOutCubic
-      el.textContent = v;
-      if(t < 1) requestAnimationFrame(frame);
-      else el.textContent = to; // ensure final
+  fichaList.innerHTML = names
+    .map(
+      (name) => `
+    <li style="display:flex;justify-content:space-between;margin-bottom:4px;">
+      <button class="load-ficha" style="flex:1;text-align:left;">${name}</button>
+      <button class="del-ficha" data-name="${name}" style="color:red;margin-left:6px;">🗑️</button>
+    </li>`
+    )
+    .join('');
+
+  qAll('.load-ficha').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      loadFicha(btn.textContent);
+      if (libraryMenu) libraryMenu.style.display = 'none';
+    });
+  });
+
+  qAll('.del-ficha').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const allData = getAllFichas();
+      const name = btn.dataset.name;
+      if (confirm(`Apagar ficha "${name}"?`)) {
+        delete allData.fichas[name];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allData));
+        updateFichaList();
+      }
+    });
+  });
+}
+
+// -------------------------------
+// Eventos do menu
+// -------------------------------
+if (libraryToggle && libraryMenu) {
+  libraryToggle.addEventListener('click', () => {
+    libraryMenu.style.display =
+      libraryMenu.style.display === 'none' ? 'block' : 'none';
+    updateFichaList();
+  });
+}
+
+if (newFichaBtn) {
+  newFichaBtn.addEventListener('click', () => {
+    Object.assign(state.attrs, { FOR: 0, AGI: 0, VIG: 0, INT: 0, AUR: 0, CAR: 0 });
+    state.pv = 10;
+    state.ps = 50;
+    state.tension = 6;
+    state.inventory = [];
+    state.personal = { name: '', origin: '', age: '', height: '', eye: '' };
+
+    q('#skills').value = '';
+    q('#abilities').value = '';
+    q('#notes').value = '';
+    q('#effectsField').value = '';
+    recalc();
+
+    if (libraryMenu) libraryMenu.style.display = 'none';
+  });
+}
+
+// -------------------------------
+// Botão principal de salvar
+// -------------------------------
+if (q('#saveBtn')) {
+  q('#saveBtn').addEventListener('click', () => {
+    const name = state.personal.name.trim();
+    if (!name) {
+      const n = prompt('Digite o nome do personagem para salvar:');
+      if (!n) return;
+      state.personal.name = n.trim();
+      q('#nameField').value = n.trim();
     }
-    requestAnimationFrame(frame);
-  }
+    saveToStorage(false);
+  });
+}
+
+// -------------------------------
+// Inicialização automática
+// -------------------------------
+(function init() {
+  const allData = getAllFichas();
+  if (allData.lastActive) loadFicha(allData.lastActive);
+  updateFichaList();
+})();
+
+window.addEventListener('beforeunload', () => saveToStorage(true));
 
   function recalc(){
     state.hpMax = 10 + (state.attrs.VIG * 3);
