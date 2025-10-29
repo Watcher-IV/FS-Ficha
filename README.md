@@ -8,3 +8,5 @@ Ficha Automática atualizada.
  ° Erro matemático concertado
 
 *Aviso:* O bug que não permite aumentar o valor total de "Tensão" está sendo corrigido
+
+testexxxx
